@@ -1,0 +1,27 @@
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Dependency directory
+node_modules
+
+# Secured configuration directories
+src/config/secure
+test/config/secure
+
+# test report
+#mochawesome-report
+
+.idea
+.vscode
+
+# Build/compiled directories
+dist
+lib
+
+project.md
