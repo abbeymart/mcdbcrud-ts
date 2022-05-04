@@ -552,7 +552,7 @@ export class Crud {
             // # validation access variables
             let taskPermitted = false,
                 ownerPermitted = false,
-                docPermitted = false,
+                recPermitted = false,
                 tablePermitted = false,
                 isAdmin = false,
                 isActive = false,
@@ -599,15 +599,15 @@ export class Crud {
             const tableFunc = (item: RoleServiceResponseType): boolean => {
                 return (item.serviceId === tableId);
             }
-            const docFunc = (item: RoleServiceResponseType): boolean => {
+            const recFunc = (item: RoleServiceResponseType): boolean => {
                 return (recordIds.includes(item.serviceId));
             }
 
             let roleTables: Array<RoleServiceResponseType> = [];
-            let roleDocs: Array<RoleServiceResponseType> = [];
+            let roleRecords: Array<RoleServiceResponseType> = [];
             if (roleServices.length > 0) {
                 roleTables = roleServices.filter(tableFunc);
-                roleDocs = roleServices.filter(docFunc);
+                roleRecords = roleServices.filter(recFunc);
             }
 
             // helper functions
@@ -640,13 +640,18 @@ export class Crud {
             }
 
             // wrapper function for the role<Type>Func
-            const recFunc = (it1: string, roleFunc: RoleFuncType): boolean => {
-                return roleDocs.some((it2: RoleServiceResponseType) => roleFunc(it1, it2));
+            const recordFunc = (it1: string, roleFunc: RoleFuncType): boolean => {
+                return roleRecords.some((it2: RoleServiceResponseType) => roleFunc(it1, it2));
             }
 
             // taskType specific permission(s) - for non-admin users
             switch (taskType) {
                 case TaskTypes.CREATE:
+                    // table level access | crudTable-Id was included in serviceIds
+                    if (roleTables.length > 0) {
+                        tablePermitted = roleTables.every(canCreateFunc);
+                    }
+                    break;
                 case TaskTypes.INSERT:
                     // table level access | crudTable-Id was included in serviceIds
                     if (roleTables.length > 0) {
@@ -658,32 +663,39 @@ export class Crud {
                     if (roleTables.length > 0) {
                         tablePermitted = roleTables.every(canUpdateFunc);
                     }
-                    // docs/records level access: every recordIds must have at least a match in the roleDocs
-                    docPermitted = recordIds.every(it1 => recFunc(it1, roleUpdateFunc));
+                    // docs/records level access: every recordIds must have at least a match in the roleRecords
+                    recPermitted = recordIds.every(it1 => recordFunc(it1, roleUpdateFunc));
                     break;
                 case TaskTypes.DELETE:
+                    // table level access
+                    if (roleTables.length > 0) {
+                        tablePermitted = roleTables.every(canDeleteFunc);
+                    }
+                    // docs/records level access: every recordIds must have at least a match in the roleRecords
+                    recPermitted = recordIds.every(it1 => recordFunc(it1, roleDeleteFunc));
+                    break;
                 case TaskTypes.REMOVE:
                     // table level access
                     if (roleTables.length > 0) {
                         tablePermitted = roleTables.every(canDeleteFunc);
                     }
-                    // docs/records level access: every recordIds must have at least a match in the roleDocs
-                    docPermitted = recordIds.every(it1 => recFunc(it1, roleDeleteFunc));
+                    // docs/records level access: every recordIds must have at least a match in the roleRecords
+                    recPermitted = recordIds.every(it1 => recordFunc(it1, roleDeleteFunc));
                     break;
                 case TaskTypes.READ:
                     // table level access
                     if (roleTables.length > 0) {
                         tablePermitted = roleTables.every(canReadFunc);
                     }
-                    // docs/records level access: every recordIds must have at least a match in the roleDocs
-                    docPermitted = recordIds.every(it1 => recFunc(it1, roleReadFunc));
+                    // docs/records level access: every recordIds must have at least a match in the roleRecords
+                    recPermitted = recordIds.every(it1 => recordFunc(it1, roleReadFunc));
                     break;
                 default:
                     return getResMessage("unAuthorized", { message: `Unknown/unsupported task-type (${taskType}` });
             }
 
-            // overall access permitted
-            taskPermitted = docPermitted || tablePermitted || ownerPermitted || isAdmin;
+            // overall access permission
+            taskPermitted = recPermitted || tablePermitted || ownerPermitted || isAdmin;
             const ok: OkResponse = { ok: taskPermitted };
             const value = { ...ok, ...{ isAdmin, isActive, userId, roleId, roleIds } };
             if (taskPermitted) {

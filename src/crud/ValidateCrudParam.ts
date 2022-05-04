@@ -8,7 +8,7 @@
 import {isEmptyObject} from "./utils";
 import * as utils from "./validate";
 import { CrudParamsType, MessageObject } from "./types";
-import { mcMessages } from "@mconnect/mcmail";
+import { mcMessages } from "../messages";
 
 export function validateSaveParams(crudParams: CrudParamsType) {
     // Initialise error object and patterns matching:

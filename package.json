@@ -43,6 +43,7 @@
     "typescript": "^4.6.3"
   },
   "dependencies": {
+    "@mconnect/mccache": "^0.4.0",
     "@mconnect/mcresponse": "^0.5.0",
     "localforage": "^1.10.0",
     "pg": "^8.7.3"
