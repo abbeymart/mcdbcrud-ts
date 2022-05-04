@@ -187,6 +187,8 @@ class SaveRecord extends Crud {
                 }
                 updateItems.push(item);
             } else if (item["id"]) {
+                this.recordIds = [];
+                this.queryParams = {};
                 // update/existing document
                 if (modelOptions.actorStamp) {
                     item["updatedBy"] = this.userId;
@@ -198,8 +200,10 @@ class SaveRecord extends Crud {
                     item["isActive"] = true;
                 }
                 updateItems.push(item);
-                recordIds.push(item.id);
+                recordIds.push(item["id"]);
             } else {
+                this.recordIds = [];
+                this.queryParams = {};
                 // exclude any traces of id, especially without concrete value ("", null, undefined), if present
                 const {id, ...saveParams} = item;
                 item = saveParams;
@@ -219,6 +223,8 @@ class SaveRecord extends Crud {
             this.updateItems = updateItems;
             // this.recordIds = recordIds;
         } else if (this.actionParams.length > 1) {
+            this.recordIds = [];
+            this.queryParams = {};
             this.actionParams.forEach((item) => {
                 if (item["id"]) {
                     // update/existing document
@@ -232,7 +238,7 @@ class SaveRecord extends Crud {
                         item["isActive"] = true;
                     }
                     updateItems.push(item);
-                    recordIds.push(item.id);
+                    recordIds.push(item["id"]);
                 } else {
                     // exclude any traces of id, especially without concrete value ("", null, undefined), if present
                     const {id, ...saveParams} = item;
@@ -252,7 +258,6 @@ class SaveRecord extends Crud {
             });
             this.createItems = createItems;
             this.updateItems = updateItems;
-            // this.recordIds = recordIds;
         }
         return {
             createItems,
@@ -266,12 +271,6 @@ class SaveRecord extends Crud {
             return getResMessage("insertError", {
                 message: "Unable to create new record(s), due to incomplete/incorrect input-parameters. ",
             });
-        }
-        // control access to security-sensitive tables - optional
-        if ((this.table === this.userTable || this.table === this.accessTable) && !this.isAdmin) {
-            return getResMessage("unAuthorized", {
-                message: "Access-security-sensitive table update are not allowed - via crud package."
-            })
         }
         // create a transaction session
         const client = await this.appDb.connect()
@@ -293,8 +292,8 @@ class SaveRecord extends Crud {
             await client.query("BEGIN")
             for await (const values of createQueryObject.fieldValues) {
                 const res = await client.query(createQueryObject.createQuery, values)
-                recordsCount += res.rowCount || 1
-                if (res.rowCount) {
+                recordsCount += res.rowCount
+                if (res.rowCount && res.rows[0].id) {
                     recordIds.push(res.rows[0].id)
                 }
             }
@@ -303,8 +302,8 @@ class SaveRecord extends Crud {
                 // delete cache
                 deleteHashCache(this.cacheKey, this.table, "key");
                 // check the audit-log settings - to perform audit-log
-                let logRes = {};
-                if (this.logCreate) {
+                let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
+                if (this.logCreate || this.logCrud) {
                     const logRecs: LogRecordsType = {logRecords: this.createItems}
                     logRes = await this.transLog.createLog(this.table, logRecs, this.userId);
                 }
@@ -337,12 +336,6 @@ class SaveRecord extends Crud {
                 message: "Unable to update record(s), due to incomplete/incorrect input-parameters. ",
             });
         }
-        // control access to security-sensitive tables - optional
-        if ((this.table === this.userTable || this.table === this.accessTable) && !this.isAdmin) {
-            return getResMessage("unAuthorized", {
-                message: "Access-security-sensitive tables update are not allowed - via crud package."
-            })
-        }
         // updated record(s)
         // create a transaction session
         const client = await this.appDb.connect()
@@ -365,8 +358,8 @@ class SaveRecord extends Crud {
             await client.query("BEGIN")
             for await (const updateQueryObject of updateQueryObjects) {
                 const res = await client.query(updateQueryObject.updateQuery, updateQueryObject.fieldValues)
-                recordsCount += res.rowCount || 1
-                if (res.rowCount) {
+                recordsCount += res.rowCount
+                if (res.rowCount && res.rows[0].id) {
                     recordIds.push(res.rows[0].id)
                 }
             }
@@ -374,8 +367,8 @@ class SaveRecord extends Crud {
                 // delete cache
                 await deleteHashCache(this.cacheKey, this.table, "key");
                 // check the audit-log settings - to perform audit-log
-                let logRes = {};
-                if (this.logUpdate) {
+                let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
+                if (this.logUpdate || this.logCrud) {
                     const logRecs: LogRecordsType = {logRecords: this.currentRecs}
                     const newLogRecs: LogRecordsType = {logRecords: this.updateItems}
                     logRes = await this.transLog.updateLog(this.table, logRecs, newLogRecs, this.userId);
@@ -409,12 +402,6 @@ class SaveRecord extends Crud {
                 message: "Unable to update record(s), due to incomplete/incorrect input-parameters. ",
             });
         }
-        // control access to security-sensitive tables - optional
-        if ((this.table === this.userTable || this.table === this.accessTable) && !this.isAdmin) {
-            return getResMessage("unAuthorized", {
-                message: "Access-security-sensitive tables update are not allowed - via crud package."
-            })
-        }
         // updated record(s)
         // create a transaction session
         const client = await this.appDb.connect()
@@ -440,8 +427,8 @@ class SaveRecord extends Crud {
                 // trx starts | include returning id for each update
                 await client.query('BEGIN')
                 const res = await client.query(updateQueryObject.updateQuery, updateQueryObject.fieldValues)
-                recordsCount += res.rowCount || 1
-                if (res.rowCount) {
+                recordsCount += res.rowCount
+                if (res.rowCount && res.rows[0].id) {
                     recordIds.push(res.rows[0].id)
                 }
                 // trx ends
@@ -467,7 +454,7 @@ class SaveRecord extends Crud {
                 // trx starts
                 await client.query('BEGIN')
                 const res = await client.query(updateQueryObject.updateQuery, updateQueryObject.fieldValues)
-                recordsCount += res.rowCount || 1
+                recordsCount += res.rowCount
                 recordIds = this.recordIds
                 // trx ends
             }
@@ -476,7 +463,7 @@ class SaveRecord extends Crud {
                 await deleteHashCache(this.cacheKey, this.table, "key");
                 // check the audit-log settings - to perform audit-log
                 let logRes = {};
-                if (this.logUpdate) {
+                if (this.logUpdate || this.logCrud) {
                     // include query-params for audit-log
                     const logRecs: LogRecordsType = {logRecords: this.currentRecs}
                     const newLogRecs: LogRecordsType = {logRecords: this.updateItems}
@@ -507,12 +494,6 @@ class SaveRecord extends Crud {
     }
 
     async updateRecordByParams(): Promise<ResponseMessage> {
-        // control access to security-sensitive tables - optional
-        if ((this.table === this.userTable || this.table === this.accessTable) && !this.isAdmin) {
-            return getResMessage("unAuthorized", {
-                message: "Access-security-sensitive tables update are not allowed - via crud package."
-            })
-        }
         // updated record(s)
         const client = await this.appDb.connect()
         let recordsCount = 0

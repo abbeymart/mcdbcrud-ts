@@ -20,7 +20,7 @@ export interface GetRecordStats {
     limit?: number;
     recordsCount?: number;
     totalRecordsCount?: number;
-    queryParams?: QueryParamsType;
+    queryParams?: QueryParamType;
     recordIds?: Array<string>;
     expire?: number;
 }
@@ -41,12 +41,12 @@ export interface DeleteResultType {
 
 export interface LogRecordsType {
     logRecords: any;
-    queryParams?: QueryParamsType;
+    queryParams?: QueryParamType;
     recordIds?: Array<string>;
 }
 
 export interface CrudResultType {
-    queryParams?: QueryParamsType;
+    queryParams?: QueryParamType;
     recordIds?: Array<string>;
     recordsCount?: number;
     records?: ActionParamsType;
@@ -59,7 +59,7 @@ export interface SaveResultType {
     taskType?: string;
     logRes?: ResponseMessage;
     recordIds?: Array<string>;
-    queryParams?: QueryParamsType;
+    queryParams?: QueryParamType;
 }
 
 export enum TaskTypes {
@@ -237,7 +237,7 @@ export interface ActionParamType {
 
 export type ActionParamsType = Array<ActionParamType>;  // documents for create or update task/operation
 
-export interface QueryParamsType {
+export interface QueryParamType {
     [key: string]: any;
 }
 
@@ -245,13 +245,13 @@ export interface ExistParamItemType {
     [key: string]: any;
 }
 
-export type ExistParamsType = Array<ExistParamItemType>;
+export type ExistParamType = Array<ExistParamItemType>;
 
-export interface ProjectParamsType {
+export interface ProjectParamType {
     [key: string]: number; // 1 for inclusion and 0 for exclusion
 }
 
-export interface SortParamsType {
+export interface SortParamType {
     [key: string]: number;          // 1 for "asc", -1 for "desc"
 }
 
@@ -282,10 +282,10 @@ export interface CrudParamType {
     roles?: Array<string>;
     recordIds?: Array<any>;
     actionParams: ActionParamsType;
-    queryParams?: QueryParamsType;
-    existParams?: ExistParamsType;
-    projectParams?: ProjectParamsType;
-    sortParams?: SortParamsType;
+    queryParams?: QueryParamType;
+    existParams?: ExistParamType;
+    projectParams?: ProjectParamType;
+    sortParams?: SortParamType;
     skip?: number;
     limit?: number;
     parentTables?: Array<string>;
@@ -335,11 +335,11 @@ export interface CrudParamsType {
     nullValues?: ActionParamType;
     defaultValues?: ActionParamType;
     actionParams?: ActionParamsType;
-    existParams?: ExistParamsType;
-    queryParams?: QueryParamsType;
+    existParams?: ExistParamType;
+    queryParams?: QueryParamType;
     recordIds?: Array<string>;
-    projectParams?: ProjectParamsType;
-    sortParams?: SortParamsType;
+    projectParams?: ProjectParamType;
+    sortParams?: SortParamType;
     token?: string;
     options?: CrudOptionsType;
     taskName?: string;

@@ -1,4 +1,4 @@
-import { QueryParamsType, WhereQueryResult } from "../types";
+import { QueryParamType, WhereQueryResult } from "../types";
 import { camelToUnderscore, isEmptyObject } from "../utils";
 
 const errMessage = (message: string) => {
@@ -13,7 +13,7 @@ const errMessage = (message: string) => {
 }
 
 // computeWhereQuery function computes the multi-cases where-conditions for crud-operations
-export function computeWhereQuery(queryParams: QueryParamsType, fieldLength: number): WhereQueryResult {
+export function computeWhereQuery(queryParams: QueryParamType, fieldLength: number): WhereQueryResult {
     try {
         // validate inputs
         if (isEmptyObject(queryParams) || !fieldLength) {

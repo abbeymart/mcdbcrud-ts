@@ -2,7 +2,7 @@ import {
     ActionParamsType,
     ActionParamType,
     MultiUpdateQueryResult,
-    QueryParamsType, UpdateQueryObject,
+    QueryParamType, UpdateQueryObject,
     UpdateQueryResult
 } from "../types";
 import { computeWhereQuery } from "./computeWhereQuery";
@@ -179,7 +179,7 @@ export function computeUpdateQueryByIds(tableName: string, actionParam: ActionPa
 }
 
 // computeUpdateQueryByParam function computes update SQL scripts by queryParams. It returns updateScript, updateValues any and/or err error
-export function computeUpdateQueryByParam(tableName: string, actionParam: ActionParamType, queryParams: QueryParamsType): UpdateQueryResult {
+export function computeUpdateQueryByParam(tableName: string, actionParam: ActionParamType, queryParams: QueryParamType): UpdateQueryResult {
     try {
         // validate inputs
         if (tableName === "" || isEmptyObject(actionParam) || !queryParams) {

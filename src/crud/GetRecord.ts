@@ -47,10 +47,10 @@ class GetRecord extends Crud {
 
         // check the audit-log settings - to perform audit-log (read/search info - params, keywords etc.)
         let logRes: ResponseMessage;
-        if (this.logRead && this.queryParams && !isEmptyObject(this.queryParams)) {
+        if ((this.logRead || this.logCrud) && this.queryParams && !isEmptyObject(this.queryParams)) {
             const logRecs: LogRecordsType = {logRecords: this.queryParams}
             logRes = await this.transLog.readLog(this.table, logRecs, this.userId);
-        } else if (this.logRead && this.recordIds && this.recordIds.length > 0) {
+        } else if ((this.logRead || this.logCrud) && this.recordIds && this.recordIds.length > 0) {
             const logRecs: LogRecordsType = {logRecords: this.recordIds}
             logRes = await this.transLog.readLog(this.table, logRecs, this.userId);
         } else {

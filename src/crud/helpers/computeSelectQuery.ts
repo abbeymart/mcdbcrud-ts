@@ -1,4 +1,4 @@
-import { ActionParamType, CrudOptionsType, QueryParamsType, SelectQueryResult } from "../types";
+import { ActionParamType, CrudOptionsType, QueryParamType, SelectQueryResult } from "../types";
 import { camelToUnderscore, isEmptyObject } from "../utils";
 import { computeWhereQuery } from "./computeWhereQuery";
 
@@ -161,7 +161,7 @@ export function computeSelectQueryByIds(modelRef: ActionParamType, tableName: st
 }
 
 // computeSelectQueryByParam compose SELECT query from the where-parameters
-export function computeSelectQueryByParams(modelRef: ActionParamType, tableName: string, queryParams: QueryParamsType, options: CrudOptionsType = {}): SelectQueryResult {
+export function computeSelectQueryByParams(modelRef: ActionParamType, tableName: string, queryParams: QueryParamType, options: CrudOptionsType = {}): SelectQueryResult {
     try {
         // validate inputs
         if (tableName === "" || Object.keys(modelRef).length < 1 || isEmptyObject(queryParams)) {

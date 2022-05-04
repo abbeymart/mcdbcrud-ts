@@ -14,13 +14,13 @@ import {
     CrudParamsType,
     CrudQueryFieldType,
     OkResponse,
-    ProjectParamsType,
-    QueryParamsType,
+    ProjectParamType,
+    QueryParamType,
     RecordCountResultType,
     RoleFuncType,
     RoleServiceResponseType,
     SelectQueryResult,
-    SortParamsType,
+    SortParamType,
     TaskAccessType,
     TaskTypes,
     UserInfoType,
@@ -44,9 +44,9 @@ export class Crud {
     protected readonly userInfo: UserInfoType;
     protected recordIds: Array<string>;       // to capture string-id | ObjectId
     protected actionParams: ActionParamsType;
-    protected queryParams: QueryParamsType;
-    protected readonly projectParams: ProjectParamsType;
-    protected readonly sortParams: SortParamsType;
+    protected queryParams: QueryParamType;
+    protected readonly projectParams: ProjectParamType;
+    protected readonly sortParams: SortParamType;
     protected taskType: TaskTypes | string;
     protected skip: number;
     protected limit: number;

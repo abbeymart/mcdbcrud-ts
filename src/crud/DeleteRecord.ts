@@ -6,11 +6,11 @@
  */
 
 // Import required module/function(s)
-import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
-import { deleteHashCache } from "@mconnect/mccache";
-import { Crud } from "./Crud";
-import { CrudOptionsType, CrudParamsType, LogRecordsType, TaskTypes } from "./types";
-import { isEmptyObject } from "./utils";
+import {getResMessage, ResponseMessage} from "@mconnect/mcresponse";
+import {deleteHashCache} from "@mconnect/mccache";
+import {Crud} from "./Crud";
+import {CrudOptionsType, CrudParamsType, LogRecordsType, TaskTypes} from "./types";
+import {isEmptyObject} from "./utils";
 import {
     computeDeleteQueryById,
     computeDeleteQueryByIds,
@@ -113,7 +113,7 @@ class DeleteRecord extends Crud {
 
     async removeRecordById(): Promise<ResponseMessage> {
         // create a transaction session
-        const client = await this.appDb.connect()
+        // const client = await this.appDb.connect()
         try {
             // trx starts
             const {deleteQueryObject, ok, message} = computeDeleteQueryById(this.table, this.recordIds[0])
@@ -128,19 +128,19 @@ class DeleteRecord extends Crud {
                     },
                 })
             }
-            const res = await client.query(deleteQueryObject.deleteQuery, deleteQueryObject.fieldValues)
+            const res = await this.appDb.query(deleteQueryObject.deleteQuery, deleteQueryObject.fieldValues)
             // trx ends
             if (res.rowCount > 0) {
                 // delete cache
                 deleteHashCache(this.cacheKey, this.table);
                 // check the audit-log settings - to perform audit-log
-                let logRes = {};
-                if (this.logDelete) {
+                let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
+                if (this.logDelete || this.logCrud) {
                     const logRecs: LogRecordsType = {logRecords: this.currentRecs}
                     logRes = await this.transLog.deleteLog(this.table, logRecs, this.userId);
                 }
                 return getResMessage("success", {
-                    message: "Document/record deleted successfully",
+                    message: "Record/document deleted successfully",
                     value  : {
                         recordCount: res.rowCount,
                         logRes,
@@ -167,13 +167,13 @@ class DeleteRecord extends Crud {
                 },
             });
         } finally {
-            client?.release();
+            // client?.release();
         }
     }
 
     async removeRecordByIds(): Promise<ResponseMessage> {
         // create a transaction session
-        const client = await this.appDb.connect()
+        // const client = await this.appDb.connect()
         try {
             // trx starts
             const {deleteQueryObject, ok, message} = computeDeleteQueryByIds(this.table, this.recordIds)
@@ -188,19 +188,19 @@ class DeleteRecord extends Crud {
                     },
                 })
             }
-            const res = await client.query(deleteQueryObject.deleteQuery, deleteQueryObject.fieldValues)
+            const res = await this.appDb.query(deleteQueryObject.deleteQuery, deleteQueryObject.fieldValues)
             // trx ends
             if (res.rowCount > 0) {
                 // delete cache
                 deleteHashCache(this.cacheKey, this.table);
                 // check the audit-log settings - to perform audit-log
-                let logRes = {};
-                if (this.logDelete) {
+                let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
+                if (this.logDelete || this.logCrud) {
                     const logRecs: LogRecordsType = {logRecords: this.currentRecs}
                     logRes = await this.transLog.deleteLog(this.table, logRecs, this.userId);
                 }
                 return getResMessage("success", {
-                    message: "Document/record deleted successfully",
+                    message: "Record/document deleted successfully",
                     value  : {
                         recordCount: res.rowCount,
                         logRes,
@@ -227,13 +227,13 @@ class DeleteRecord extends Crud {
                 },
             });
         } finally {
-            client?.release();
+            // client?.release();
         }
     }
 
     async removeRecordByParams(): Promise<ResponseMessage> {
         // create a transaction session
-        const client = await this.appDb.connect()
+        // const client = await this.appDb.connect()
         try {
             if (this.queryParams && !isEmptyObject(this.queryParams)) {
                 // trx starts
@@ -249,19 +249,19 @@ class DeleteRecord extends Crud {
                         },
                     })
                 }
-                const res = await client.query(deleteQueryObject.deleteQuery, deleteQueryObject.fieldValues)
+                const res = await this.appDb.query(deleteQueryObject.deleteQuery, deleteQueryObject.fieldValues)
                 // trx ends
                 if (res.rowCount > 0) {
                     // delete cache
                     deleteHashCache(this.cacheKey, this.table);
                     // check the audit-log settings - to perform audit-log
-                    let logRes = {};
-                    if (this.logDelete) {
+                    let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
+                    if (this.logDelete || this.logCrud) {
                         const logRecs: LogRecordsType = {logRecords: this.currentRecs}
                         logRes = await this.transLog.deleteLog(this.table, logRecs, this.userId);
                     }
                     return getResMessage("success", {
-                        message: "Document/record deleted successfully",
+                        message: "Record/document deleted successfully",
                         value  : {
                             recordCount: res.rowCount,
                             logRes,
@@ -298,7 +298,7 @@ class DeleteRecord extends Crud {
                 },
             });
         } finally {
-            client?.release();
+            // client?.release();
         }
     }
 }
@@ -308,4 +308,4 @@ function newDeleteRecord(params: CrudParamsType, options: CrudOptionsType = {}) 
     return new DeleteRecord(params, options);
 }
 
-export { DeleteRecord, newDeleteRecord };
+export {DeleteRecord, newDeleteRecord};
