@@ -1,11 +1,3 @@
-/**
- * @Author: abbeymart | Abi Akindele | @Created: 2020-07-11
- * @Company: Copyright 2020 Abi Akindele  | mConnect.biz
- * @License: All Rights Reserved | LICENSE.md
- * @Description: mc: check-error testing
- */
-
-// import mctest from "@mconnect/mctest";
 import { assertEquals, assertNotEquals, mcTest, postTestResult } from "@mconnect/mctest";
 import { Status, getResMessage } from "../src";
 

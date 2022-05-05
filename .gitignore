@@ -13,6 +13,8 @@ node_modules
 # Secured configuration directories
 src/config/secure
 test/config/secure
+config.*
+
 
 # test report
 #mochawesome-report

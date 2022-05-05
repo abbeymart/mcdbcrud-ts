@@ -1,5 +1,5 @@
 import { Pool, Client } from "pg";
-import { DbSecureType, DbOptionsType, DbParamsType } from "./types";
+import { DbSecureType, DbConnectionOptionsType, DbConfigType } from "./types";
 
 export class DbPg {
     private readonly host: string;
@@ -10,11 +10,11 @@ export class DbPg {
     private readonly port: number;
     private readonly poolSize: number;
     private readonly secureOption: DbSecureType;
-    private readonly options: DbOptionsType;
+    private readonly options: DbConnectionOptionsType;
     private readonly checkAccess: boolean;
     private readonly dbUrl: string;
 
-    constructor(dbConfig: DbParamsType, options?: DbOptionsType) {
+    constructor(dbConfig: DbConfigType, options?: DbConnectionOptionsType) {
         this.host = dbConfig?.host || "";
         this.username = dbConfig?.username || "";
         this.password = dbConfig?.password || "";
@@ -103,6 +103,6 @@ export class DbPg {
 
 }
 
-export function newDbPg(dbConfig: DbParamsType, options?: DbOptionsType) {
+export function newDbPg(dbConfig: DbConfigType, options?: DbConnectionOptionsType) {
     return new DbPg(dbConfig, options);
 }

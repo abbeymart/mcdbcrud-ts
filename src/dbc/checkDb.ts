@@ -6,10 +6,10 @@
  */
 
 import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
-import { DbType } from "./types";
+import { DbConnectionType } from "./types";
 import { PoolClient } from "pg";
 
-export function checkDb(db: DbType): ResponseMessage {
+export function checkDb(db: DbConnectionType): ResponseMessage {
     if (db) {
         return getResMessage("success", {
             message: "valid database",

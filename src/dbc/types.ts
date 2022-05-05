@@ -1,12 +1,13 @@
 import { Client, Pool } from "pg";
 
 export interface DbSecureType {
-    secureAccess: boolean;
+    secureAccess?: boolean;
     secureCert?: string;
     secureKey?: string;
+    sslMode?: string;
 }
 
-export interface DbOptionsType {
+export interface DbConnectionOptionsType {
     checkAccess?: boolean;
     poolSize?: number;
     reconnectTries?: number;
@@ -18,7 +19,8 @@ export interface DbOptionsType {
     connectionTimeoutMillis?: number;
 }
 
-export interface DbParamsType {
+export interface DbConfigType {
+    dbType?: string;
     host?: string;
     username?: string;
     password?: string;
@@ -27,12 +29,13 @@ export interface DbParamsType {
     location?: string;      // => URI
     port?: number | string;
     poolSize?: number;
+    options?: DbConnectionOptionsType;
     secureOption?: DbSecureType;
-    uri?: string;
+    url?: string;
     timezone?: string
     max?: number;
     idleTimeoutMillis?: number;
     connectionTimeoutMillis?: number;
 }
 
-export type DbType = Pool | Client
+export type DbConnectionType = Pool | Client
