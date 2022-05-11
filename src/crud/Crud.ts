@@ -144,9 +144,7 @@ export class Crud {
             limit: this.limit,
         });
         // auditLog constructor / instance
-        this.transLog = newAuditLog(this.auditDb, {
-            auditTable: this.auditTable,
-        });
+        this.transLog = newAuditLog(this.auditDb, this.auditTable);
         // standard defaults
         this.isAdmin = false;
         this.isActive = true;

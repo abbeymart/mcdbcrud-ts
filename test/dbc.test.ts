@@ -1,31 +1,35 @@
-import {assertEquals, assertNotEquals, mcTest, postTestResult} from "@mconnect/mctest";
-import {DbConfigType, newDbPg,} from "../src";
+import {assertEquals, mcTest, postTestResult} from "@mconnect/mctest";
+import {newDbPg,} from "../src";
 import {MyDb} from "./config";
+import {PoolClient} from "pg";
 
 // test-data: db-configuration settings
 let myDb = MyDb
 myDb.options = {}
 
-const dbc = newDbPg(myDb, myDb.options)
+const dbc = newDbPg(myDb, myDb.options);
 
-const sqliteDb = {
-    dbType  : "sqlite3",
-    filename: "testdb.db",
-} as DbConfigType
+// const sqliteDb = {
+//     dbType  : "sqlite3",
+//     filename: "testdb.db",
+// } as DbConfigType;
 
 (async () => {
     await mcTest({
         name    : "should successfully connect to the PostgresDB - Client",
         testFunc: async () => {
             let pResult = false
-            dbc.pgClient().connect().then(res => {
-                console.log("pool-result: ", res)
+            try {
+                await dbc.pgClient().connect()
+                console.log("dbc-client-connected: ")
                 pResult = true
-            }).catch(err => {
-                console.log("client-error: ", err)
+            } catch (e) {
+                console.log("dbc-client-connection-error: ", e)
                 pResult = false
-            });
-            assertEquals(pResult, true, `pool-result-connected: ${true}`);
+            } finally {
+                await dbc.closePgClient()
+            }
+            assertEquals(pResult, true, `client-result-connected: ${true}`);
         }
     });
 
@@ -33,16 +37,21 @@ const sqliteDb = {
         name    : "should successfully connect to the PostgresDB - Pool",
         testFunc: async () => {
             let pResult = false
-            dbc.pgPool().connect().then(res => {
-                console.log("pool-result: ", res)
+            let dbcPool: PoolClient
+            try {
+                dbcPool = await dbc.pgPool().connect()
+                console.log("pool-client--connected: ", dbcPool)
                 pResult = true
-            }).catch(err => {
-                console.log("client-error: ", err)
+            } catch (e) {
+                console.log("pool-client-connect-error: ", e)
                 pResult = false
-            });
+            } finally {
+                await dbc.closePgPool()
+            }
             assertEquals(pResult, true, `pool-result-connected: ${true}`);
         }
     });
 
     await postTestResult();
+
 })();

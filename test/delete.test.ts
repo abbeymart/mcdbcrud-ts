@@ -1,5 +1,8 @@
 import { assertEquals, assertNotEquals, mcTest, postTestResult } from '@mconnect/mctest';
-import { Status, getResMessage } from '../src';
+import { Status, getResMessage } from '@mconnect/mcresponse';
+import {MyDb} from "./config";
+import {CrudParamsType, newDbPg, newDeleteRecord, newGetRecord} from "../src";
+import {AuditModel, CrudParamOptions, DeleteTable, GetTable, TestUserInfo} from "./testData";
 
 let msgType = 'success',
     options = {
@@ -14,6 +17,22 @@ let msgType = 'success',
         value     : '',
         message   : 'Request completed successfully',
     };
+
+let myDb = MyDb
+myDb.options = {}
+
+const dbc = newDbPg(myDb, myDb.options);
+
+const crudParams: CrudParamsType = {
+    appDb      : dbc.pgPool(),
+    modelRef   : AuditModel,
+    table      : DeleteTable,
+    userInfo   : TestUserInfo,
+    recordIds  : [],
+    queryParams: {},
+}
+const crud = newDeleteRecord(crudParams, CrudParamOptions);
+
 
 (async () => {
     await mcTest({

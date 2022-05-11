@@ -6,18 +6,18 @@
  */
 
 // Import required module/function
-import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
-import { checkDb } from "../dbc";
-import { Pool } from "pg";
+import {getResMessage, ResponseMessage} from "@mconnect/mcresponse";
+import {checkDb} from "../dbc";
+import {Pool} from "pg";
 
 //types
 export interface AuditLogOptionsType {
-    auditTable?: string;
     tableName?: string;
     logRecords?: any;
     newLogRecords?: any;
     recordParams?: any;
     newRecordParams?: any;
+    auditTable?: string;
 }
 
 export enum AuditLogTypes {
@@ -35,9 +35,9 @@ class AuditLog {
     private readonly dbHandle: Pool;
     private readonly auditTable: string;
 
-    constructor(auditDb: Pool, options?: AuditLogOptionsType) {
+    constructor(auditDb: Pool, auditTable = "audits") {
         this.dbHandle = auditDb;
-        this.auditTable = options && options.auditTable ? options.auditTable : "audits";
+        this.auditTable = auditTable;
     }
 
     async createLog(tableName: string, logRecords: any, userId: string): Promise<ResponseMessage> {
@@ -62,7 +62,7 @@ class AuditLog {
         }
         if (errorMessage) {
             console.log("error-message: ", errorMessage);
-            return getResMessage("logError", {
+            return getResMessage("paramsError", {
                 message: errorMessage,
             });
         }
@@ -92,7 +92,7 @@ class AuditLog {
         } catch (error) {
             console.error("Error saving create-audit record(s): ", error);
             return getResMessage("logError", {
-                value: error,
+                value  : error,
                 message: "Error saving create-audit record(s): " + error.message,
             });
         }
@@ -123,7 +123,7 @@ class AuditLog {
                 "Updated record(s) information is required.";
         }
         if (errorMessage) {
-            return getResMessage("insertError", {
+            return getResMessage("paramsError", {
                 message: errorMessage,
             });
         }
@@ -153,7 +153,7 @@ class AuditLog {
         } catch (error) {
             console.error("Error saving update-audit record(s): ", error);
             return getResMessage("insertError", {
-                value: error,
+                value  : error,
                 message: "Error saving update-audit record(s): " + error.message,
             });
         }
@@ -172,11 +172,12 @@ class AuditLog {
                 "Table or Collection name is required.";
         }
         if (!logRecords) {
-            errorMessage = errorMessage ? errorMessage + " | Search keywords or Read record(s) information is required." :
+            errorMessage = errorMessage ?
+                errorMessage + " | Search keywords or Read record(s) information is required." :
                 "Search keywords or Read record(s) information is required.";
         }
         if (errorMessage) {
-            return getResMessage("insertError", {
+            return getResMessage("paramsError", {
                 message: errorMessage,
             });
         }
@@ -213,7 +214,7 @@ class AuditLog {
         } catch (error) {
             console.error("Error inserting read/search-audit record(s): ", error);
             return getResMessage("insertError", {
-                value: error,
+                value  : error,
                 message: "Error inserting read/search-audit record(s):" + error.message,
             });
         }
@@ -240,7 +241,7 @@ class AuditLog {
                 "Deleted record(s) information is required.";
         }
         if (errorMessage) {
-            return getResMessage("insertError", {
+            return getResMessage("paramsError", {
                 message: errorMessage,
             });
         }
@@ -270,7 +271,7 @@ class AuditLog {
         } catch (error) {
             console.log("Error saving delete-audit record(s): ", error);
             return getResMessage("insertError", {
-                value: error,
+                value  : error,
                 message: "Error inserting delete-audit record(s):" + error.message,
             });
         }
@@ -287,7 +288,7 @@ class AuditLog {
             errorMessage = errorMessage + " | Login information is required."
         }
         if (errorMessage) {
-            return getResMessage("insertError", {
+            return getResMessage("paramsError", {
                 message: errorMessage,
             });
         }
@@ -325,7 +326,7 @@ class AuditLog {
         } catch (error) {
             console.log("Error inserting login-audit record(s): ", error);
             return getResMessage("insertError", {
-                value: error,
+                value  : error,
                 message: "Error inserting login-audit record(s):" + error.message,
             });
         }
@@ -346,7 +347,7 @@ class AuditLog {
             errorMessage = errorMessage + " | Logout information is required."
         }
         if (errorMessage) {
-            return getResMessage("insertError", {
+            return getResMessage("paramsError", {
                 message: errorMessage,
             });
         }
@@ -376,7 +377,7 @@ class AuditLog {
         } catch (error) {
             console.log("Error inserting logout-audit record(s): ", error);
             return getResMessage("insertError", {
-                value: error,
+                value  : error,
                 message: "Error inserting login-audit record(s):" + error.message,
             });
         }
@@ -416,7 +417,7 @@ class AuditLog {
                         "Created record(s) information is required.";
                 }
                 if (errorMessage) {
-                    return getResMessage("insertError", {
+                    return getResMessage("paramsError", {
                         message: errorMessage,
                     });
                 }
@@ -450,7 +451,7 @@ class AuditLog {
                         "Updated record(s) information is required.";
                 }
                 if (errorMessage) {
-                    return getResMessage("insertError", {
+                    return getResMessage("paramsError", {
                         message: errorMessage,
                     });
                 }
@@ -480,7 +481,7 @@ class AuditLog {
                         "Deleted record(s) information is required.";
                 }
                 if (errorMessage) {
-                    return getResMessage("insertError", {
+                    return getResMessage("paramsError", {
                         message: errorMessage,
                     });
                 }
@@ -502,11 +503,12 @@ class AuditLog {
                         "Table or Collection name is required.";
                 }
                 if (!logRecords) {
-                    errorMessage = errorMessage ? errorMessage + " | Search keywords or Read record(s) information is required." :
+                    errorMessage = errorMessage ?
+                        errorMessage + " | Search keywords or Read record(s) information is required." :
                         "Search keywords or Read record(s) information is required.";
                 }
                 if (errorMessage) {
-                    return getResMessage("insertError", {
+                    return getResMessage("paramsError", {
                         message: errorMessage,
                     });
                 }
@@ -534,7 +536,7 @@ class AuditLog {
                     errorMessage = errorMessage + " | Login information is required."
                 }
                 if (errorMessage) {
-                    return getResMessage("insertError", {
+                    return getResMessage("paramsError", {
                         message: errorMessage,
                     });
                 }
@@ -565,7 +567,7 @@ class AuditLog {
                     errorMessage = errorMessage + " | Logout information is required."
                 }
                 if (errorMessage) {
-                    return getResMessage("insertError", {
+                    return getResMessage("paramsError", {
                         message: errorMessage,
                     });
                 }
@@ -600,15 +602,15 @@ class AuditLog {
         } catch (error) {
             console.log("Error saving audit-log record(s): ", error);
             return getResMessage("insertError", {
-                value: error,
+                value  : error,
                 message: "Error inserting audit-log record(s):" + error.message,
             });
         }
     }
 }
 
-function newAuditLog(auditDb: Pool, options?: AuditLogOptionsType) {
-    return new AuditLog(auditDb, options);
+function newAuditLog(auditDb: Pool, auditTable = "audits") {
+    return new AuditLog(auditDb, auditTable);
 }
 
-export { AuditLog, newAuditLog };
+export {AuditLog, newAuditLog};

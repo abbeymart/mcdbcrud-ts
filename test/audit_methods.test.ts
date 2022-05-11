@@ -1,6 +1,6 @@
 import {assertEquals, assertStrictEquals, mcTest, postTestResult} from "@mconnect/mctest";
 import {MyDb} from "./config";
-import {AuditLogTypes, newAuditLog, newDbPg} from "../src";
+import {newAuditLog, newDbPg} from "../src";
 
 //
 const tableName = "services"
@@ -33,10 +33,7 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
     await mcTest({
         name    : 'should store create-transaction log and return success:',
         testFunc: async () => {
-            const res = await mcLog.auditLog(AuditLogTypes.CREATE, userId, {
-                tableName : tableName,
-                logRecords: recs,
-            })
+            const res = await mcLog.createLog(tableName, recs, userId)
             assertEquals(res.code, "success", `res.Code should be: success`);
             assertEquals(res.message.includes("successfully"), true, `res-message should include: successfully`);
         }
@@ -45,11 +42,7 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
     await mcTest({
         name    : 'should store update-transaction log and return success:',
         testFunc: async () => {
-            const res = await mcLog.auditLog(AuditLogTypes.UPDATE, userId, {
-                tableName    : tableName,
-                logRecords   : recs,
-                newLogRecords: newRecs,
-            })
+            const res = await mcLog.updateLog(tableName, recs, newRecs, userId)
             assertEquals(res.code, "success", `res.Code should be: success`);
             assertEquals(res.message.includes("successfully"), true, `res-message should include: successfully`);
         }
@@ -57,10 +50,7 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
     await mcTest({
         name    : 'should store read-transaction log and return success:',
         testFunc: async () => {
-            const res = await mcLog.auditLog(AuditLogTypes.READ, userId, {
-                tableName : tableName,
-                logRecords: readP,
-            })
+            const res = await mcLog.readLog(tableName, readP, userId)
             assertEquals(res.code, "success", `res.Code should be: success`);
             assertEquals(res.message.includes("successfully"), true, `res-message should include: successfully`);
         }
@@ -68,10 +58,7 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
     await mcTest({
         name    : 'should store delete-transaction log and return success:',
         testFunc: async () => {
-            const res = await mcLog.auditLog(AuditLogTypes.DELETE, userId, {
-                tableName : tableName,
-                logRecords: recs,
-            })
+            const res = await mcLog.deleteLog(tableName, recs, userId)
             assertEquals(res.code, "success", `res.Code should be: success`);
             assertEquals(res.message.includes("successfully"), true, `res-message should include: successfully`);
         }
@@ -79,10 +66,7 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
     await mcTest({
         name    : 'should store login-transaction log and return success:',
         testFunc: async () => {
-            const res = await mcLog.auditLog(AuditLogTypes.LOGIN, userId, {
-                tableName : tableName,
-                logRecords: recs,
-            })
+            const res = await mcLog.loginLog(recs, userId)
             assertEquals(res.code, "success", `res.Code should be: success`);
             assertEquals(res.message.includes("successfully"), true, `res-message should include: successfully`);
         }
@@ -91,10 +75,7 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
     await mcTest({
         name    : 'should store logout-transaction log and return success:',
         testFunc: async () => {
-            const res = await mcLog.auditLog(AuditLogTypes.LOGOUT, userId, {
-                tableName : tableName,
-                logRecords: recs,
-            })
+            const res = await mcLog.logoutLog(recs, userId)
             assertEquals(res.code, "success", `res.Code should be: success`);
             assertEquals(res.message.includes("successfully"), true, `res-message should include: successfully`);
         }
@@ -103,10 +84,7 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
     await mcTest({
         name    : 'should return paramsError for incomplete/undefined inputs:',
         testFunc: async () => {
-            const res = await mcLog.auditLog(AuditLogTypes.CREATE, userId, {
-                tableName : "",
-                logRecords: recs,
-            })
+            const res = await mcLog.createLog("", recs, userId)
             assertEquals(res.code, "insertError", `res.Code should be: success`);
             assertEquals(res.message.includes("Table or Collection name is required"), true, `res-message should include: Table or Collection name is required`);
         }

@@ -1,5 +1,8 @@
-import { assertEquals, assertNotEquals, mcTest, postTestResult } from '@mconnect/mctest';
-import { Status, getResMessage } from '../src';
+import {assertEquals, assertNotEquals, mcTest, postTestResult} from '@mconnect/mctest';
+import {Status, getResMessage} from '@mconnect/mcresponse';
+import {MyDb} from "./config";
+import {CrudParamsType, newDbPg, newGetRecord, newSaveRecord} from "../src";
+import {AuditModel, AuditTable, CrudParamOptions, GetTable, TestUserInfo} from "./testData";
 
 let msgType = 'success',
     options = {
@@ -14,6 +17,21 @@ let msgType = 'success',
         value     : '',
         message   : 'Request completed successfully',
     };
+
+let myDb = MyDb
+myDb.options = {}
+
+const dbc = newDbPg(myDb, myDb.options);
+
+const crudParams: CrudParamsType = {
+    appDb      : dbc.pgPool(),
+    modelRef   : AuditModel,
+    table      : AuditTable,
+    userInfo   : TestUserInfo,
+    recordIds  : [],
+    queryParams: {},
+}
+const crud = newSaveRecord(crudParams, CrudParamOptions);
 
 (async () => {
     await mcTest({
