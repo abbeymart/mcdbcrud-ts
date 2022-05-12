@@ -1,22 +1,10 @@
-import { assertEquals, assertNotEquals, mcTest, postTestResult } from '@mconnect/mctest';
-import { Status, getResMessage } from '@mconnect/mcresponse';
+import { assertEquals, mcTest, postTestResult } from '@mconnect/mctest';
 import {MyDb} from "./config";
-import {CrudParamsType, newDbPg, newDeleteRecord, newGetRecord} from "../src";
-import {AuditModel, CrudParamOptions, DeleteTable, GetTable, TestUserInfo} from "./testData";
-
-let msgType = 'success',
-    options = {
-        value  : ['a', 'b', 'c'],
-        code   : '',
-        message: '',
-    },
-    res = {
-        code      : 'success',
-        resCode   : Status.OK,
-        resMessage: 'OK',
-        value     : '',
-        message   : 'Request completed successfully',
-    };
+import {CrudParamsType, newDbPg, newDeleteRecord,} from "../src";
+import {
+    AuditModel, CrudParamOptions, DeleteAllTable, DeleteAuditById, DeleteAuditByIds, DeleteAuditByParams, DeleteTable,
+    TestUserInfo
+} from "./testData";
 
 let myDb = MyDb
 myDb.options = {}
@@ -30,61 +18,61 @@ const crudParams: CrudParamsType = {
     userInfo   : TestUserInfo,
     recordIds  : [],
     queryParams: {},
-}
-const crud = newDeleteRecord(crudParams, CrudParamOptions);
-
+};
 
 (async () => {
     await mcTest({
-        name    : 'should return success code for success-message',
-        testFunc: () => {
-            const req = getResMessage(msgType, options);
-            assertEquals(res.code, req.code, `response-code should be: ${res.code}`);
-            assertNotEquals(req.code, 'unAuthorized');
+        name    : 'should prevent the delete of all table records and return removeError:',
+        testFunc: async () => {
+            crudParams.table = DeleteAllTable
+            crudParams.recordIds = []
+            crudParams.queryParams = {}
+            const crud = newDeleteRecord(crudParams, CrudParamOptions);
+            const res = await crud.deleteRecord()
+            console.log("delete-all-res: ", res)
+            assertEquals(res.code, "removeError", `delete-task permitted by ids or queryParams only: removeError code expected`);
         }
     });
 
     await mcTest({
-        name    : 'should return ok/200 resCode for success-message',
-        testFunc: () => {
-            const req = getResMessage(msgType);
-            assertEquals(res.resCode, req.resCode, `resCode should be: ${res.resCode}`);
-            assertEquals(res.resMessage, req.resMessage, `resCode should be: ${res.resMessage}`);
+        name    : 'should delete record by Id and return success or notFound[delete-record-method]:',
+        testFunc: async () => {
+            crudParams.table = DeleteTable
+            crudParams.recordIds = [DeleteAuditById]
+            crudParams.queryParams = {}
+            const crud = newDeleteRecord(crudParams, CrudParamOptions);
+            const res = await crud.deleteRecord()
+            console.log("delete-by-id-res: ", res)
+            const resCode = res.code == "success" || res.code == "notFound"
+            assertEquals(resCode, true, `res-code should be success or notFound:`);
         }
     });
 
     await mcTest({
-        name    : 'should return Completed successfully message for success-message',
-        testFunc: () => {
-            const req = getResMessage(msgType, options);
-            assertEquals(res.message, req.message, `message should be: ${res.message}`);
+        name    : 'should delete record by Ids and return success or notFound[delete-record-method]:',
+        testFunc: async () => {
+            crudParams.table = DeleteTable
+            crudParams.recordIds = DeleteAuditByIds
+            crudParams.queryParams = {}
+            const crud = newDeleteRecord(crudParams, CrudParamOptions);
+            const res = await crud.deleteRecord()
+            console.log("delete-by-ids-res: ", res)
+            const resCode = res.code == "success" || res.code == "notFound"
+            assertEquals(resCode, true, `res-code should be success or notFound:`);
         }
     });
 
     await mcTest({
-        name    : 'should return correct default message',
-        testFunc: () => {
-            options = {
-                value  : ['a', 'b', 'c'],
-                code   : '',
-                message: 'completed successfully',
-            }
-            const req = getResMessage(msgType, options);
-            assertEquals(req.message.includes(options.message), true, `response should be: true`);
-        }
-    });
-
-    await mcTest({
-        name    : 'should return correct custom message',
-        testFunc: () => {
-            options = {
-                value  : ['a', 'b', 'c'],
-                code   : '',
-                message: 'custom completed successfully',
-            }
-            const req = getResMessage("authCode", options);
-            assertEquals(req.code, "authCode", `response should be: authCode`);
-            assertEquals(req.message === options.message, true, `response should be: true`);
+        name    : 'should delete records by query-params and return success or notFound[delete-record-method]:',
+        testFunc: async () => {
+            crudParams.table = DeleteTable
+            crudParams.recordIds = []
+            crudParams.queryParams = DeleteAuditByParams
+            const crud = newDeleteRecord(crudParams, CrudParamOptions);
+            const res = await crud.deleteRecord()
+            console.log("delete-by-params-res: ", res)
+            const resCode = res.code == "success" || res.code == "notFound"
+            assertEquals(resCode, true, `res-code should be success or notFound:`);
         }
     });
 
