@@ -130,33 +130,21 @@ class DeleteRecord extends Crud {
             }
             const res = await this.appDb.query(deleteQueryObject.deleteQuery, deleteQueryObject.fieldValues)
             // trx ends
-            if (res.rowCount > 0) {
-                // delete cache
-                deleteHashCache(this.cacheKey, this.table);
-                // check the audit-log settings - to perform audit-log
-                let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
-                if (this.logDelete || this.logCrud) {
-                    const logRecs: LogRecordsType = {logRecords: this.currentRecs}
-                    logRes = await this.transLog.deleteLog(this.table, logRecs, this.userId);
-                }
-                return getResMessage("success", {
-                    message: "Record/document deleted successfully",
-                    value  : {
-                        recordCount: res.rowCount,
-                        logRes,
-                    }
-                });
-            } else {
-                return getResMessage("removeError", {
-                    message: "No record(s) deleted",
-                    value  : {
-                        queryParams: this.queryParams,
-                        recordIds  : this.recordIds,
-                        deleteQuery: deleteQueryObject.deleteQuery,
-                        fieldValues: deleteQueryObject.fieldValues,
-                    },
-                });
+            // delete cache
+            deleteHashCache(this.cacheKey, this.table);
+            // check the audit-log settings - to perform audit-log
+            let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
+            if (this.logDelete || this.logCrud) {
+                const logRecs: LogRecordsType = {logRecords: this.currentRecs}
+                logRes = await this.transLog.deleteLog(this.table, logRecs, this.userId);
             }
+            return getResMessage("success", {
+                message: "Record/document deleted successfully",
+                value  : {
+                    recordCount: res.rowCount,
+                    logRes,
+                }
+            });
         } catch (e) {
             // await client.query("ROLLBACK")
             return getResMessage("removeError", {
@@ -190,33 +178,21 @@ class DeleteRecord extends Crud {
             }
             const res = await this.appDb.query(deleteQueryObject.deleteQuery, deleteQueryObject.fieldValues)
             // trx ends
-            if (res.rowCount > 0) {
-                // delete cache
-                deleteHashCache(this.cacheKey, this.table);
-                // check the audit-log settings - to perform audit-log
-                let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
-                if (this.logDelete || this.logCrud) {
-                    const logRecs: LogRecordsType = {logRecords: this.currentRecs}
-                    logRes = await this.transLog.deleteLog(this.table, logRecs, this.userId);
-                }
-                return getResMessage("success", {
-                    message: "Record/document deleted successfully",
-                    value  : {
-                        recordCount: res.rowCount,
-                        logRes,
-                    }
-                });
-            } else {
-                return getResMessage("removeError", {
-                    message: "No record(s) deleted",
-                    value  : {
-                        queryParams: this.queryParams,
-                        recordIds  : this.recordIds,
-                        deleteQuery: deleteQueryObject.deleteQuery,
-                        fieldValues: deleteQueryObject.fieldValues,
-                    },
-                });
+            // delete cache
+            deleteHashCache(this.cacheKey, this.table);
+            // check the audit-log settings - to perform audit-log
+            let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
+            if (this.logDelete || this.logCrud) {
+                const logRecs: LogRecordsType = {logRecords: this.currentRecs}
+                logRes = await this.transLog.deleteLog(this.table, logRecs, this.userId);
             }
+            return getResMessage("success", {
+                message: "Record/document deleted successfully",
+                value  : {
+                    recordCount: res.rowCount,
+                    logRes,
+                }
+            });
         } catch (e) {
             // await client.query("ROLLBACK")
             return getResMessage("removeError", {
@@ -251,34 +227,21 @@ class DeleteRecord extends Crud {
                 }
                 const res = await this.appDb.query(deleteQueryObject.deleteQuery, deleteQueryObject.fieldValues)
                 // trx ends
-                if (res.rowCount > 0) {
-                    // delete cache
-                    deleteHashCache(this.cacheKey, this.table);
-                    // check the audit-log settings - to perform audit-log
-                    let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
-                    if (this.logDelete || this.logCrud) {
-                        const logRecs: LogRecordsType = {logRecords: this.currentRecs}
-                        logRes = await this.transLog.deleteLog(this.table, logRecs, this.userId);
-                    }
-                    return getResMessage("success", {
-                        message: "Record/document deleted successfully",
-                        value  : {
-                            recordCount: res.rowCount,
-                            logRes,
-                        }
-                    });
-                } else {
-                    return getResMessage("removeError", {
-                        message: "No record(s) deleted",
-                        value  : {
-                            queryParams: this.queryParams,
-                            recordIds  : this.recordIds,
-                            deleteQuery: deleteQueryObject.deleteQuery,
-                            fieldValues: deleteQueryObject.fieldValues,
-                            res        : res,
-                        },
-                    });
+                //delete cache
+                deleteHashCache(this.cacheKey, this.table);
+                // check the audit-log settings - to perform audit-log
+                let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
+                if (this.logDelete || this.logCrud) {
+                    const logRecs: LogRecordsType = {logRecords: this.currentRecs}
+                    logRes = await this.transLog.deleteLog(this.table, logRecs, this.userId);
                 }
+                return getResMessage("success", {
+                    message: "Record/document deleted successfully",
+                    value  : {
+                        recordCount: res.rowCount,
+                        logRes,
+                    }
+                });
             } else {
                 return getResMessage("removeError", {
                     message: "Unable to delete record(s), due to missing queryParams",

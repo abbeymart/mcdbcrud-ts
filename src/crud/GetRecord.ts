@@ -139,10 +139,66 @@ class GetRecord extends Crud {
             }
         }
         // check login-status
-        const accessRes = await this.checkLoginStatus()
-        const userRec: CheckAccessType = accessRes.value;
-        // get all records, up to the permissible limit - admin-user only
-        if (userRec.isAdmin && userRec.isActive) {
+        if (this.checkAccess) {
+            const accessRes = await this.checkLoginStatus()
+            const userRec: CheckAccessType = accessRes.value;
+            // get all records, up to the permissible limit - admin-user only
+            if (userRec.isAdmin && userRec.isActive) {
+                try {
+                    const res = await this.getCurrentRecords()
+                    if (res.code === "success") {
+                        // save copy in the cache
+                        const resultValue: GetResultType = {
+                            records: res.value.records,
+                            stats  : res.value.stats,
+                            logRes,
+                        }
+                        setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
+                        return getResMessage("success", {
+                            value: resultValue,
+                        });
+                    }
+                    return getResMessage("notFound", {
+                        message: res.message,
+                        value  : res,
+                    });
+                } catch (error) {
+                    return getResMessage("notFound", {
+                        value: error,
+                    });
+                }
+            }
+            // get records by ownership, createdBy
+            if (userRec.userId && userRec.isActive) {
+                try {
+                    this.queryParams = {
+                        "createdBy": userRec.userId,
+                    }
+                    const res = await this.getCurrentRecords("queryParams")
+                    if (res.code === "success") {
+                        // save copy in the cache
+                        const resultValue: GetResultType = {
+                            records: res.value.records,
+                            stats  : res.value.stats,
+                            logRes,
+                        }
+                        setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
+                        return getResMessage("success", {
+                            value: resultValue,
+                        });
+                    }
+                    return getResMessage("notFound", {
+                        message: res.message,
+                        value  : res,
+                    });
+                } catch (error) {
+                    return getResMessage("notFound", {
+                        value: error,
+                    });
+                }
+            }
+        }
+        if (this.getAllRecords) {
             try {
                 const res = await this.getCurrentRecords()
                 if (res.code === "success") {
@@ -152,7 +208,7 @@ class GetRecord extends Crud {
                         stats  : res.value.stats,
                         logRes,
                     }
-                    setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
+                    // setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
                     return getResMessage("success", {
                         value: resultValue,
                     });
@@ -167,36 +223,6 @@ class GetRecord extends Crud {
                 });
             }
         }
-        // get records by ownership, createdBy
-        if (userRec.userId && userRec.isActive) {
-            try {
-                this.queryParams = {
-                    "createdBy": userRec.userId,
-                }
-                const res = await this.getCurrentRecords("queryParams")
-                if (res.code === "success") {
-                    // save copy in the cache
-                    const resultValue: GetResultType = {
-                        records: res.value.records,
-                        stats  : res.value.stats,
-                        logRes,
-                    }
-                    setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
-                    return getResMessage("success", {
-                        value: resultValue,
-                    });
-                }
-                return getResMessage("notFound", {
-                    message: res.message,
-                    value  : res,
-                });
-            } catch (error) {
-                return getResMessage("notFound", {
-                    value: error,
-                });
-            }
-        }
-
         return getResMessage("notFound", {
             value: {},
         });

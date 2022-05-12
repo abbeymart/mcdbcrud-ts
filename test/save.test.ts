@@ -1,7 +1,7 @@
 import {assertEquals, mcTest, postTestResult} from '@mconnect/mctest';
 import {MyDb} from "./config";
 import {
-    CrudParamsType, CrudResultType, newDbPg, newDeleteRecord, newSaveRecord
+    CrudParamsType, CrudResultType, newDbPg, newSaveRecord
 } from "../src";
 import {
     AuditCreateActionParams,
@@ -36,9 +36,11 @@ const crudParams: CrudParamsType = {
             const crud = newSaveRecord(crudParams, CrudParamOptions);
             const res = await crud.saveRecord()
             const resValue = res.value as CrudResultType
+            const idLen = resValue.recordIds?.length || 0
+            const recCount = resValue.recordsCount || 0
             assertEquals(res.code, "success", `create-task should return code: success`);
-            assertEquals(resValue.recordIds.length, recLen, `response-value-records-length should be: ${recLen}`);
-            assertEquals(resValue.recordsCount, recLen, `response-value-recordsCount should be: ${recLen}`);
+            assertEquals(idLen, recLen, `response-value-records-length should be: ${recLen}`);
+            assertEquals(recCount, recLen, `response-value-recordsCount should be: ${recLen}`);
         }
     });
 
@@ -53,9 +55,11 @@ const crudParams: CrudParamsType = {
             const crud = newSaveRecord(crudParams, CrudParamOptions);
             const res = await crud.saveRecord()
             const resValue = res.value as CrudResultType
+            const idLen = resValue.recordIds?.length || 0
+            const recCount = resValue.recordsCount || 0
             assertEquals(res.code, "success", `update-task should return code: success`);
-            assertEquals(resValue.recordIds.length, recLen, `response-value-records-length should be: ${recLen}`);
-            assertEquals(resValue.recordsCount, recLen, `response-value-recordsCount should be: ${recLen}`);
+            assertEquals(idLen, recLen, `response-value-records-length should be: ${recLen}`);
+            assertEquals(recCount, recLen, `response-value-recordsCount should be: ${recLen}`);
         }
     });
 
@@ -70,9 +74,11 @@ const crudParams: CrudParamsType = {
             const crud = newSaveRecord(crudParams, CrudParamOptions);
             const res = await crud.saveRecord()
             const resValue = res.value as CrudResultType
+            const idLen = resValue.recordIds?.length || 0
+            const recCount = resValue.recordsCount || 0
             assertEquals(res.code, "success", `update-by-id-task should return code: success`);
-            assertEquals(resValue.recordIds.length, recLen, `response-value-records-length should be: ${recLen}`);
-            assertEquals(resValue.recordsCount, recLen, `response-value-recordsCount should be: ${recLen}`);
+            assertEquals(idLen, recLen, `response-value-records-length should be: ${recLen}`);
+            assertEquals(recCount, recLen, `response-value-recordsCount should be: ${recLen}`);
         }
     });
 
@@ -87,9 +93,11 @@ const crudParams: CrudParamsType = {
             const crud = newSaveRecord(crudParams, CrudParamOptions);
             const res = await crud.saveRecord()
             const resValue = res.value as CrudResultType
+            const idLen = resValue.recordIds?.length || 0
+            const recCount = resValue.recordsCount || 0
             assertEquals(res.code, "success", `update-by-id-task should return code: success`);
-            assertEquals(resValue.recordIds.length, recLen, `response-value-records-length should be: ${recLen}`);
-            assertEquals(resValue.recordsCount, recLen, `response-value-recordsCount should be: ${recLen}`);
+            assertEquals(idLen, recLen, `response-value-records-length should be: ${recLen}`);
+            assertEquals(recCount, recLen, `response-value-recordsCount should be: ${recLen}`);
         }
     });
 
@@ -101,15 +109,16 @@ const crudParams: CrudParamsType = {
             crudParams.recordIds = []
             crudParams.queryParams = UpdateAuditByParams
             const recLen = 0
-            const crud = newDeleteRecord(crudParams, CrudParamOptions);
-            const res = await crud.deleteRecord()
+            const crud = newSaveRecord(crudParams, CrudParamOptions);
+            const res = await crud.saveRecord()
             const resValue = res.value as CrudResultType
+            const recCount = resValue.recordsCount || 0
             assertEquals(res.code, "success", `create-task should return code: success`);
-            assertEquals(resValue.recordIds.length > recLen, true, `response-value-records-length should be >: ${recLen}`);
-            assertEquals(resValue.recordsCount > recLen, true, `response-value-recordsCount should be >: ${recLen}`);
+            assertEquals(recCount > recLen, true, `response-value-recordsCount should be >: ${recLen}`);
         }
     });
 
     await postTestResult();
+    await dbc.closePgPool()
 
 })();

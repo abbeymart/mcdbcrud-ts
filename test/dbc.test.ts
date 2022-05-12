@@ -1,7 +1,6 @@
 import {assertEquals, mcTest, postTestResult} from "@mconnect/mctest";
 import {newDbPg,} from "../src";
 import {MyDb} from "./config";
-import {PoolClient} from "pg";
 
 // test-data: db-configuration settings
 let myDb = MyDb
@@ -29,7 +28,26 @@ const dbc = newDbPg(myDb, myDb.options);
             } finally {
                 await dbc.closePgClient()
             }
-            assertEquals(pResult, true, `client-result-connected: ${true}`);
+            assertEquals(pResult, true, `client-result-connected: true`);
+        }
+    });
+
+    await mcTest({
+        name    : "should successfully connect to the PostgresDB - Pool-Client",
+        testFunc: async () => {
+            let pResult = false
+            try {
+                console.log("dbc-client-connected: ")
+                const client = await dbc.pgPool().connect()
+                client.release()
+                pResult = true
+            } catch (e) {
+                console.log("dbc-client-connection-error: ", e)
+                pResult = false
+            } finally {
+                await dbc.closePgPool()
+            }
+            assertEquals(pResult, true, `client-result-connected: true`);
         }
     });
 
@@ -37,10 +55,9 @@ const dbc = newDbPg(myDb, myDb.options);
         name    : "should successfully connect to the PostgresDB - Pool",
         testFunc: async () => {
             let pResult = false
-            let dbcPool: PoolClient
             try {
-                dbcPool = await dbc.pgPool().connect()
-                console.log("pool-client--connected: ", dbcPool)
+                await dbc.pgPool().connect()
+                console.log("pool-client--connected: ")
                 pResult = true
             } catch (e) {
                 console.log("pool-client-connect-error: ", e)
@@ -48,7 +65,7 @@ const dbc = newDbPg(myDb, myDb.options);
             } finally {
                 await dbc.closePgPool()
             }
-            assertEquals(pResult, true, `pool-result-connected: ${true}`);
+            assertEquals(pResult, true, `pool-result-connected: true`);
         }
     });
 

@@ -28,10 +28,12 @@ const crudParams: CrudParamsType = {
             const crud = newGetRecord(crudParams, CrudParamOptions);
             const res = await crud.getRecord()
             const resValue = res.value as GetResultType
+            const recLen = resValue.records?.length || 0
+            const recCount = resValue.stats?.recordsCount || 0
             assertEquals(res.code, "success", `response-code should be: success`);
             assertNotEquals(res.code, 'unAuthorized', `response-code should be: success not unAuthorized`);
-            assertEquals(resValue.records.length, 1, `response-value-records-length should be: 1`);
-            assertEquals(resValue.stats.recordsCount, 1, `response-value-stats-recordsCount should be: 1`);
+            assertEquals(recLen, 1, `response-value-records-length should be: 1`);
+            assertEquals(recCount, 1, `response-value-stats-recordsCount should be: 1`);
         }
     });
 
@@ -43,10 +45,12 @@ const crudParams: CrudParamsType = {
             const crud = newGetRecord(crudParams, CrudParamOptions);
             const res = await crud.getRecord()
             const resValue = res.value as GetResultType
+            const recLen = resValue.records?.length || 0
+            const recCount = resValue.stats?.recordsCount || 0
             assertEquals(res.code, "success", `response-code should be: success`);
             assertNotEquals(res.code, 'unAuthorized', `response-code should be: success not unAuthorized`);
-            assertEquals(resValue.records.length, 2, `response-value-records-length should be: 2`);
-            assertEquals(resValue.stats.recordsCount, 2, `response-value-stats-recordsCount should be: 2`);
+            assertEquals(recLen, 2, `response-value-records-length should be: 2`);
+            assertEquals(recCount, 2, `response-value-stats-recordsCount should be: 2`);
         }
     });
 
@@ -59,10 +63,12 @@ const crudParams: CrudParamsType = {
             const crud = newGetRecord(crudParams, CrudParamOptions);
             const res = await crud.getRecord()
             const resValue = res.value as GetResultType
+            const recLen = resValue.records?.length || 0
+            const recCount = resValue.stats?.recordsCount || 0
             assertEquals(res.code, "success", `response-code should be: success`);
             assertNotEquals(res.code, 'unAuthorized', `response-code should be: success not unAuthorized`);
-            assertEquals(resValue.records.length > 0, true, `response-value-records-length should be: > 0`);
-            assertEquals(resValue.stats.recordsCount > 0, true, `response-value-stats-recordsCount should be:  > 0`);
+            assertEquals(recLen > 0, true, `response-value-records-length should be: > 0`);
+            assertEquals(recCount > 0, true, `response-value-stats-recordsCount should be:  > 0`);
         }
     });
 
@@ -72,13 +78,16 @@ const crudParams: CrudParamsType = {
             crudParams.table = GetTable
             crudParams.recordIds = []
             crudParams.queryParams = {}
+            CrudParamOptions.getAllRecords = true
             const crud = newGetRecord(crudParams, CrudParamOptions);
             const res = await crud.getRecord()
             const resValue = res.value as GetResultType
+            const recLen = resValue.records?.length || 0
+            const recCount = resValue.stats?.recordsCount || 0
             assertEquals(res.code, "success", `response-code should be: success`);
             assertNotEquals(res.code, 'unAuthorized', `response-code should be: success not unAuthorized`);
-            assertEquals(resValue.records.length > 20, true, `response-value-records-length should be: > 20`);
-            assertEquals(resValue.stats.recordsCount > 20, true, `response-value-stats-recordsCount should be:  > 20`);
+            assertEquals(recLen > 20, true, `response-value-records-length should be: > 20`);
+            assertEquals(recCount > 20, true, `response-value-stats-recordsCount should be:  > 20`);
         }
     });
 
@@ -90,17 +99,20 @@ const crudParams: CrudParamsType = {
             crudParams.queryParams = {}
             crudParams.skip = 0
             crudParams.limit = 20
+            CrudParamOptions.getAllRecords = true
             const crud = newGetRecord(crudParams, CrudParamOptions);
             const res = await crud.getRecord()
             const resValue = res.value as GetResultType
+            const recLen = resValue.records?.length || 0
+            const recCount = resValue.stats?.recordsCount || 0
             assertEquals(res.code, "success", `response-code should be: success`);
             assertNotEquals(res.code, 'unAuthorized', `response-code should be: success not unAuthorized`);
-            assertEquals(resValue.records.length, 20, `response-value-records-length should be: 20`);
-            assertEquals(resValue.stats.recordsCount, 20, `response-value-stats-recordsCount should be: 20`);
+            assertEquals(recLen, 20, `response-value-records-length should be: 20`);
+            assertEquals(recCount, 20, `response-value-stats-recordsCount should be: 20`);
         }
     });
 
-
     await postTestResult();
+    await dbc.closePgPool()
 
 })();

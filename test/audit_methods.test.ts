@@ -1,4 +1,4 @@
-import {assertEquals, assertStrictEquals, mcTest, postTestResult} from "@mconnect/mctest";
+import {assertEquals, mcTest, postTestResult} from "@mconnect/mctest";
 import {MyDb} from "./config";
 import {newAuditLog, newDbPg} from "../src";
 
@@ -26,7 +26,7 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
     await mcTest({
         name    : 'should connect to the DB and return an instance object',
         testFunc: () => {
-            assertStrictEquals(mcLog, mcLogResult, `db-connection instance should be: ${mcLogResult}`);
+            assertEquals(mcLog.getAuditTable, mcLogResult.auditTable, `audit-table should be: ${mcLogResult.auditTable}`);
         }
     });
 
@@ -85,10 +85,11 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
         name    : 'should return paramsError for incomplete/undefined inputs:',
         testFunc: async () => {
             const res = await mcLog.createLog("", recs, userId)
-            assertEquals(res.code, "insertError", `res.Code should be: success`);
+            assertEquals(res.code, "paramsError", `res.Code should be: paramsError`);
             assertEquals(res.message.includes("Table or Collection name is required"), true, `res-message should include: Table or Collection name is required`);
         }
     });
 
     await postTestResult();
+    await dbc.closePgPool()
 })();

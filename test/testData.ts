@@ -181,12 +181,17 @@ export const GetAuditByParams = {
     "logType": "create",
 } as QueryParamType
 
-export const DeleteAuditById = "99f0f869-3c84-4a5e-83ac-3b9f893dcd60"
+// 91b3c435-fce7-4d28-9e05-cc9feafb5b48
+// 708713f2-ea16-404a-959c-2cb5762c394a
+// 05a85b66-d68a-4f46-834d-b1c4f9c58a6c
+// 03a24b50-9cf2-40b4-9375-1ad6b9831310
+// 19209e24-d8cc-45a1-a7e9-4d7646b886f6
+export const DeleteAuditById = "91b3c435-fce7-4d28-9e05-cc9feafb5b48"
 export const DeleteAuditByIds = [
-    "9e9f7733-7653-4069-9f42-dc157768a960",
-    "35304003-567f-4e25-9f1d-6483760db621",
-    "d0a1445e-f12f-4d45-98e5-22689dec48e5",
-    "39774322-9be5-4b43-9d6e-e2ba514e0f43",
+    "708713f2-ea16-404a-959c-2cb5762c394a",
+    "05a85b66-d68a-4f46-834d-b1c4f9c58a6c",
+    "03a24b50-9cf2-40b4-9375-1ad6b9831310",
+    "19209e24-d8cc-45a1-a7e9-4d7646b886f6",
 ] as Array<string>
 
 export const DeleteAuditByParams = {

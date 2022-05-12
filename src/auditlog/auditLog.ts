@@ -40,6 +40,14 @@ class AuditLog {
         this.auditTable = auditTable;
     }
 
+    get getAuditTable() {
+        return this.auditTable
+    }
+
+    get getAuditDb() {
+        return this.dbHandle
+    }
+
     async createLog(tableName: string, logRecords: any, userId: string): Promise<ResponseMessage> {
         const dbCheck = checkDb(this.dbHandle);
         if (dbCheck.code !== "success") {
@@ -332,7 +340,7 @@ class AuditLog {
         }
     }
 
-    async logoutLog(logRecords: any, userId: string, tableName = "users",): Promise<ResponseMessage> {
+    async logoutLog(logRecords: any, userId: string, tableName = "users"): Promise<ResponseMessage> {
         const dbCheck = checkDb(this.dbHandle);
         if (!dbCheck) {
             return dbCheck;
@@ -487,7 +495,7 @@ class AuditLog {
                 }
 
                 query = {
-                    text  : "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_by, log_at ) VALUES ($1, $2, $3, $4, $5,);",
+                    text  : "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_by, log_at ) VALUES ($1, $2, $3, $4, $5);",
                     values: [tableName, logRecords, AuditLogTypes.REMOVE, userId, new Date()],
                 }
                 break;

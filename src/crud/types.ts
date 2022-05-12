@@ -5,9 +5,9 @@
  * @Description: CRUD types
  */
 
-import { AuditLog } from "../auditlog";
-import { ResponseMessage } from "@mconnect/mcresponse";
-import { Pool } from "pg";
+import {AuditLog} from "../auditlog";
+import {ResponseMessage} from "@mconnect/mcresponse";
+import {Pool} from "pg";
 
 export interface ObjectRefType {
     [key: string]: any;
@@ -387,6 +387,7 @@ export interface CrudOptionsType {
     modelOptions?: ModelOptionsType;
     fieldSeparator?: string;
     queryFieldType?: CrudQueryFieldType;
+    getAllRecords?: boolean;
 }
 
 export interface CreateQueryObject {
@@ -468,6 +469,11 @@ export interface OkResponse {
 
 export interface RecordCountResultType {
     totalRecords: number;
+    ok: boolean;
+    message: string;
+}
+
+export interface OwnerRecordCountResultType {
     ownerRecords: number;
     ok: boolean;
     message: string;

@@ -5,7 +5,7 @@
  */
 
 // Import required module/function(s)/types
-import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
+import {getResMessage, ResponseMessage} from "@mconnect/mcresponse";
 import {
     ActionParamsType,
     ActionParamType,
@@ -13,7 +13,7 @@ import {
     CrudOptionsType,
     CrudParamsType,
     CrudQueryFieldType,
-    OkResponse,
+    OkResponse, OwnerRecordCountResultType,
     ProjectParamType,
     QueryParamType,
     RecordCountResultType,
@@ -25,15 +25,15 @@ import {
     TaskTypes,
     UserInfoType,
 } from "./types";
-import { AuditLog, newAuditLog } from "../auditlog";
-import { Pool, PoolClient, QueryResult } from "pg";
+import {AuditLog, newAuditLog} from "../auditlog";
+import {Pool, PoolClient, QueryResult} from "pg";
 import {
     computeSelectQueryAll,
     computeSelectQueryById,
     computeSelectQueryByIds,
     computeSelectQueryByParams
 } from "./helpers/computeSelectQuery";
-import { toCamelCase } from "./utils";
+import {toCamelCase} from "./utils";
 
 export class Crud {
     protected params: CrudParamsType;
@@ -68,6 +68,7 @@ export class Crud {
     protected readonly logLogout: boolean;
     protected transLog: AuditLog;
     protected cacheKey: string;
+    protected getAllRecords: boolean;
     protected readonly checkAccess: boolean;
     protected userId: string;
     protected isAdmin: boolean;
@@ -100,13 +101,13 @@ export class Crud {
         this.recordIds = params && params.recordIds ? params.recordIds : [];
         this.userInfo = params && params.userInfo ? params.userInfo :
             {
-                token: "",
-                userId: "",
+                token    : "",
+                userId   : "",
                 firstname: "",
-                lastname: "",
-                language: "",
+                lastname : "",
+                language : "",
                 loginName: "",
-                expire: 0,
+                expire   : 0,
             };
         this.token = params && params.token ? params.token : this.userInfo.token || "";
         this.userId = this.userInfo.userId || "";
@@ -135,14 +136,15 @@ export class Crud {
         this.queryFieldType = options?.queryFieldType || CrudQueryFieldType.Underscore;
         // unique cache-key
         this.cacheKey = JSON.stringify({
-            table: this.table,
-            queryParams: this.queryParams,
+            table        : this.table,
+            queryParams  : this.queryParams,
             projectParams: this.projectParams,
-            sortParams: this.sortParams,
-            recordIds: this.recordIds,
-            skip: this.skip,
-            limit: this.limit,
+            sortParams   : this.sortParams,
+            recordIds    : this.recordIds,
+            skip         : this.skip,
+            limit        : this.limit,
         });
+        this.getAllRecords = options?.getAllRecords || false;
         // auditLog constructor / instance
         this.transLog = newAuditLog(this.auditDb, this.auditTable);
         // standard defaults
@@ -156,7 +158,8 @@ export class Crud {
         this.actionAuthorized = false;
         this.recExistMessage = "Save / update error or duplicate records exist. ";
         this.unAuthorizedMessage = "Action / task not authorised or permitted. ";
-        this.usernameExistsMessage = options?.usernameExistsMessage ? options.usernameExistsMessage : "Username already exists. ";
+        this.usernameExistsMessage = options?.usernameExistsMessage ? options.usernameExistsMessage :
+            "Username already exists. ";
         this.emailExistsMessage = options?.emailExistsMessage ? options.emailExistsMessage : "Email already exists. ";
     }
 
@@ -186,7 +189,27 @@ export class Crud {
         }
     }
 
-    // recordsCount method query DB-tables and returns totalRecords and ownerRecords (by userId), and ok and message
+    // ownerRecordsCount method query DB-tables and returns ownerRecords (by userId), and ok and message
+    async ownerRecordsCount(): Promise<OwnerRecordCountResultType> {
+        // count owner-records
+        const ownerScript = `SELECT COUNT(*) AS ownerrows FROM ${this.table} WHERE created_by = $1`
+        const ownerRowsRes = await this.appDb.query(ownerScript, [this.userInfo.userId])
+        const ownerRows = ownerRowsRes.rows[0].ownerrows
+        if (ownerRows < 1) {
+            return {
+                ownerRecords: 0,
+                ok          : false,
+                message     : "Owner records count error - no records found",
+            }
+        }
+        return {
+            ownerRecords: ownerRows,
+            ok          : true,
+            message     : "success",
+        }
+    }
+
+    // recordsCount method query DB-tables and returns totalRecords (by userId), and ok and message
     async recordsCount(): Promise<RecordCountResultType> {
         // totalRecordsCount from the table
         const countQuery = `SELECT COUNT(*) AS totalrows FROM ${this.table}`
@@ -195,28 +218,14 @@ export class Crud {
         if (totalRows < 1) {
             return {
                 totalRecords: 0,
-                ownerRecords: 0,
-                ok: false,
-                message: "Total records count error - no records found",
-            }
-        }
-        // count owner-records
-        const ownerScript = `"SELECT COUNT(*) AS ownerrows FROM ${this.table} WHERE created_by = $1`
-        const ownerRowsRes = await this.appDb.query(ownerScript, [this.userInfo.userId])
-        const ownerRows = ownerRowsRes.rows[0].ownerrows
-        if (ownerRows < 1) {
-            return {
-                totalRecords: 0,
-                ownerRecords: 0,
-                ok: false,
-                message: "Owner records count error - no records found",
+                ok          : false,
+                message     : "Total records count error - no records found",
             }
         }
         return {
             totalRecords: totalRows,
-            ownerRecords: ownerRows,
-            ok: true,
-            message: "success",
+            ok          : true,
+            message     : "success",
         }
     }
 
@@ -262,19 +271,19 @@ export class Crud {
                     // select by id
                     if (this.recordIds.length === 1) {
                         selectQueryResult = computeSelectQueryById(this.modelRef, this.table, this.recordIds[0], {
-                            skip: this.skip,
+                            skip : this.skip,
                             limit: this.limit
                         })
                     } else {
                         selectQueryResult = computeSelectQueryByIds(this.modelRef, this.table, this.recordIds, {
-                            skip: this.skip,
+                            skip : this.skip,
                             limit: this.limit
                         })
                     }
                     if (!selectQueryResult.ok) {
                         return getResMessage("readError", {
                             message: selectQueryResult.message,
-                            value: {
+                            value  : {
                                 selectQuery: selectQueryResult.selectQueryObject.selectQuery,
                                 fieldValues: selectQueryResult.selectQueryObject.fieldValues,
                             }
@@ -286,17 +295,17 @@ export class Crud {
                 case "queryParams":
                     // get records by params
                     selectQueryResult = computeSelectQueryByParams(this.modelRef, this.table, this.queryParams, {
-                        skip: this.skip,
+                        skip : this.skip,
                         limit: this.limit
                     })
                     if (!selectQueryResult.ok) {
                         return getResMessage("readError", {
                             message: selectQueryResult.message,
-                            value: {
+                            value  : {
                                 selectQuery: selectQueryResult.selectQueryObject.selectQuery,
                                 fieldValues: selectQueryResult.selectQueryObject.fieldValues,
-                                modelRef: this.modelRef,
-                                table: this.table,
+                                modelRef   : this.modelRef,
+                                table      : this.table,
                                 queryParams: this.queryParams,
                             }
                         })
@@ -307,17 +316,17 @@ export class Crud {
                 case "queryparams":
                     // get records by params
                     selectQueryResult = computeSelectQueryByParams(this.modelRef, this.table, this.queryParams, {
-                        skip: this.skip,
+                        skip : this.skip,
                         limit: this.limit
                     })
                     if (!selectQueryResult.ok) {
                         return getResMessage("readError", {
                             message: selectQueryResult.message,
-                            value: {
+                            value  : {
                                 selectQuery: selectQueryResult.selectQueryObject.selectQuery,
                                 fieldValues: selectQueryResult.selectQueryObject.fieldValues,
-                                modelRef: this.modelRef,
-                                table: this.table,
+                                modelRef   : this.modelRef,
+                                table      : this.table,
                                 queryParams: this.queryParams,
                             }
                         })
@@ -328,13 +337,13 @@ export class Crud {
                 default:
                     // get all records
                     selectQueryResult = computeSelectQueryAll(this.modelRef, this.table, {
-                        skip: this.skip,
+                        skip : this.skip,
                         limit: this.limit
                     })
                     if (!selectQueryResult.ok) {
                         return getResMessage("readError", {
                             message: selectQueryResult.message,
-                            value: {
+                            value  : {
                                 selectQuery: selectQueryResult.selectQueryObject.selectQuery,
                                 fieldValues: selectQueryResult.selectQueryObject.fieldValues,
                             }
@@ -352,12 +361,12 @@ export class Crud {
                 this.currentRecs = records;
                 return getResMessage("success", {
                     message: "Current document/record(s) retrieved successfully.",
-                    value: {
+                    value  : {
                         records: records,
-                        stats: {
-                            skip: this.skip,
-                            limit: this.limit,
-                            recordsCount: records.length,
+                        stats  : {
+                            skip             : this.skip,
+                            limit            : this.limit,
+                            recordsCount     : records.length,
                             totalRecordsCount: Number(totalRows),
                         },
                     }
@@ -365,7 +374,7 @@ export class Crud {
             } else {
                 return getResMessage("notFound", {
                     message: "Current document/record(s) not found.",
-                    value: {
+                    value  : {
                         selectQuery: selectQueryResult.selectQueryObject.selectQuery,
                         fieldValues: selectQueryResult.selectQueryObject.fieldValues,
                     }
@@ -375,7 +384,7 @@ export class Crud {
             console.error(e);
             return getResMessage("notFound", {
                 message: `Error retrieving current document/record(s): ${e.message}`,
-                value: {},
+                value  : {},
             });
         }
     }
@@ -419,15 +428,15 @@ export class Crud {
             if (res.rows.length > 0) {
                 for (const rec of res.rows) {
                     roleServices.push({
-                        serviceId: rec.service_id,
-                        roleId: rec.role_id,
-                        roleIds: roleIds,
+                        serviceId      : rec.service_id,
+                        roleId         : rec.role_id,
+                        roleIds        : roleIds,
                         serviceCategory: rec.service_category,
-                        canRead: rec.can_read,
-                        canCreate: rec.can_create,
-                        canUpdate: rec.can_update,
-                        canDelete: rec.can_delete,
-                        canCrud: rec.can_crud,
+                        canRead        : rec.can_read,
+                        canCreate      : rec.can_create,
+                        canUpdate      : rec.can_update,
+                        canDelete      : rec.can_delete,
+                        canCrud        : rec.can_crud,
                     });
                 }
             }
@@ -515,31 +524,31 @@ export class Crud {
             }
 
             let permittedRes: TaskAccessType = {
-                userId: userRec.userId,
-                roleId: userRec.roleId,
-                roleIds: userRec.roleIds,
-                isActive: userRec.isActive,
-                isAdmin: userRec.isAdmin || false,
-                roleServices: roleServices,
-                tableId: tableId,
+                userId        : userRec.userId,
+                roleId        : userRec.roleId,
+                roleIds       : userRec.roleIds,
+                isActive      : userRec.isActive,
+                isAdmin       : userRec.isAdmin || false,
+                roleServices  : roleServices,
+                tableId       : tableId,
                 ownerPermitted: ownerPermitted,
             }
             if (permittedRes.isActive && (permittedRes.isAdmin || ownerPermitted)) {
-                return getResMessage("success", { value: permittedRes });
+                return getResMessage("success", {value: permittedRes});
             }
             const recLen = permittedRes.roleServices?.length || 0;
             if (permittedRes.isActive && recLen > 0 && recLen >= recordIds.length) {
-                return getResMessage("success", { value: permittedRes });
+                return getResMessage("success", {value: permittedRes});
             }
             return getResMessage("unAuthorized",
                 {
                     message: `Access permitted for ${recordIds.length} of ${recLen} service-items/records`,
-                    value: permittedRes
+                    value  : permittedRes
                 }
             );
         } catch (e) {
             console.error("check-access-error: ", e);
-            return getResMessage("unAuthorized", { message: e.message });
+            return getResMessage("unAuthorized", {message: e.message});
         }
     }
 
@@ -563,7 +572,7 @@ export class Crud {
 
             // validate and set recordIds
             if (this.recordIds.length < 1) {
-                return getResMessage("unAuthorized", { message: "Document Ids not specified." });
+                return getResMessage("unAuthorized", {message: "Document Ids not specified."});
             }
             recordIds = this.recordIds;
 
@@ -586,11 +595,11 @@ export class Crud {
 
             // validate active status
             if (!isActive) {
-                return getResMessage("unAuthorized", { message: "Account is not active. Validate active status" });
+                return getResMessage("unAuthorized", {message: "Account is not active. Validate active status"});
             }
             // validate roleServices permission, for non-admin/non-owner users
             if (!isAdmin && !ownerPermitted && roleServices.length < 1) {
-                return getResMessage("unAuthorized", { message: "You are not authorized to perform the requested action/task" });
+                return getResMessage("unAuthorized", {message: "You are not authorized to perform the requested action/task"});
             }
 
             // filter the roleServices by categories ("table" and "document"/"record")
@@ -689,27 +698,27 @@ export class Crud {
                     recPermitted = recordIds.every(it1 => recordFunc(it1, roleReadFunc));
                     break;
                 default:
-                    return getResMessage("unAuthorized", { message: `Unknown/unsupported task-type (${taskType}` });
+                    return getResMessage("unAuthorized", {message: `Unknown/unsupported task-type (${taskType}`});
             }
 
             // overall access permission
             taskPermitted = recPermitted || tablePermitted || ownerPermitted || isAdmin;
-            const ok: OkResponse = { ok: taskPermitted };
-            const value = { ...ok, ...{ isAdmin, isActive, userId, roleId, roleIds } };
+            const ok: OkResponse = {ok: taskPermitted};
+            const value = {...ok, ...{isAdmin, isActive, userId, roleId, roleIds}};
             if (taskPermitted) {
                 return getResMessage("success", {
-                    value: value,
+                    value  : value,
                     message: "action authorised / permitted"
                 });
             } else {
                 return getResMessage("unAuthorized", {
-                    value: value,
+                    value  : value,
                     message: "You are not authorized to perform the requested action/task"
                 });
             }
         } catch (e) {
-            const ok: OkResponse = { ok: false };
-            return getResMessage("unAuthorized", { value: ok, message: e.message });
+            const ok: OkResponse = {ok: false};
+            return getResMessage("unAuthorized", {value: ok, message: e.message});
         }
     }
 
@@ -722,7 +731,7 @@ export class Crud {
             if (this.currentRecs.length < 1) {
                 const currentRecRes = await this.getCurrentRecords("queryParams");
                 if (currentRecRes.code !== "success") {
-                    return getResMessage("notFound", { message: "missing records, required to process permission" });
+                    return getResMessage("notFound", {message: "missing records, required to process permission"});
                 }
                 this.currentRecs = currentRecRes.value.records;
             }
@@ -733,7 +742,7 @@ export class Crud {
             return await this.taskPermissionById(taskType);
         } catch (e) {
             // console.error("task-permission-error: ", e);
-            return getResMessage("unAuthorized", { message: e.message });
+            return getResMessage("unAuthorized", {message: e.message});
         }
     }
 
@@ -781,17 +790,17 @@ export class Crud {
             }
 
             const checkAccessValue: CheckAccessType = {
-                userId: userRes.rows[0].id,
-                roleId: userRes.rows[0].profile.role_id,
-                roleIds: userRes.rows[0].role_ids,
+                userId  : userRes.rows[0].id,
+                roleId  : userRes.rows[0].profile.role_id,
+                roleIds : userRes.rows[0].role_ids,
                 isActive: userRes.rows[0].is_active,
-                isAdmin: userRes.rows[0].is_admin || false,
-                profile: userRes.rows[0].profile,
+                isAdmin : userRes.rows[0].is_admin || false,
+                profile : userRes.rows[0].profile,
             }
 
             return getResMessage("success", {
                 message: "Access Permitted: ",
-                value: checkAccessValue,
+                value  : checkAccessValue,
             });
         } catch (e) {
             console.error("check-login-status-error:", e);

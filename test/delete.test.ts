@@ -77,5 +77,6 @@ const crudParams: CrudParamsType = {
     });
 
     await postTestResult();
+    await dbc.closePgPool()
 
 })();
