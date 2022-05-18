@@ -1,5 +1,10 @@
 # Historical logs
 
+## Version 0.2.0
+
+- Release date: May 18, 2022
+- Updated deps
+
 ## Version 0.1.0
 
 - Release date: May 12, 2022

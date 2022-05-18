@@ -1,6 +1,6 @@
 {
   "name": "@mconnect/mcdbcrud",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "mConnect CRUD Operations for Postgres SQL DB",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
@@ -36,15 +36,15 @@
   },
   "homepage": "https://github.com/abbeymart/mcdbcrud-ts#readme",
   "devDependencies": {
-    "@mconnect/mctest": "^0.2.7",
+    "@mconnect/mctest": "^0.5.5",
     "@types/node": "^17.0.29",
     "@types/pg": "^8.6.5",
     "tslib": "^2.4.0",
     "typescript": "^4.6.3"
   },
   "dependencies": {
-    "@mconnect/mccache": "^0.4.0",
-    "@mconnect/mcresponse": "^0.5.0",
+    "@mconnect/mccache": "^0.5.3",
+    "@mconnect/mcresponse": "^0.5.2",
     "localforage": "^1.10.0",
     "pg": "^8.7.3",
     "pg-cursor": "^2.7.3"
