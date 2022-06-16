@@ -1,5 +1,5 @@
-import { QueryParamType, WhereQueryResult } from "../types";
-import { camelToUnderscore, isEmptyObject } from "../utils";
+import {QueryParamType, WhereQueryResult} from "../types";
+import {camelToUnderscore, isEmptyObject} from "../utils";
 
 const errMessage = (message: string) => {
     return {
@@ -19,11 +19,14 @@ export function computeWhereQuery(queryParams: QueryParamType, fieldLength: numb
         if (isEmptyObject(queryParams) || !fieldLength) {
             return errMessage("queryParams (where-conditions) and fieldLength (starting position for the where-condition-placeholder-values) are required.")
         }
-        // compute queryParams script from queryParams
+
+        // script-computation-variables
         let whereQuery = " WHERE "
         let fieldValues: Array<any> = []
         let fieldCount = 0
         const whereFieldLength = Object.keys(queryParams).length
+
+        // compute queryParams script from queryParams
         for (const [fieldName, fieldValue] of Object.entries(queryParams)) {
             // compose where-conditions for fieldValue by types
             switch (typeof fieldValue) {
@@ -32,6 +35,7 @@ export function computeWhereQuery(queryParams: QueryParamType, fieldLength: numb
                     if (Array.isArray(fieldValue) && fieldValue.length > 0) {
                         const idLen = fieldValue.length
                         let recIds = "("
+                        // compose field-values for the fieldName item-values, of type string
                         if (fieldValue.every(val => typeof val === "string")) {
                             for (let i = 0; i < idLen; i++) {
                                 recIds += "'" + fieldValue[i] + "'"
@@ -40,6 +44,8 @@ export function computeWhereQuery(queryParams: QueryParamType, fieldLength: numb
                                 }
                             }
                         } else {
+                            // return errMessage(`Where-query: Unsupported field-value-type for field-name: ${fieldName}, field-value: ${fieldValue}`)
+                            // TODO: optional-step/review??, compose rec-Ids for any other value=types, i.e. type any
                             for (let i = 0; i < idLen; i++) {
                                 recIds += fieldValue[i]
                                 if (i < idLen - 1) {
@@ -66,7 +72,15 @@ export function computeWhereQuery(queryParams: QueryParamType, fieldLength: numb
                     whereQuery += `${camelToUnderscore(fieldName)}=$${fieldLength}`
                     fieldLength += 1
                     break;
+                case "bigint":
+                    fieldValues.push(fieldValue)
+                    whereQuery += `${camelToUnderscore(fieldName)}=$${fieldLength}`
+                    fieldLength += 1
+                    break;
+                default:
+                    return errMessage(`Where-query: Unsupported field-value-type for field-name: ${fieldName}, field-value: ${fieldValue}`)
             }
+
             fieldCount += 1
             if (whereFieldLength > 1 && fieldCount < whereFieldLength) {
                 whereQuery += " AND "
@@ -82,6 +96,6 @@ export function computeWhereQuery(queryParams: QueryParamType, fieldLength: numb
             message         : "success"
         }
     } catch (e) {
-        return errMessage(e.message)
+        return errMessage(`Where-query: ${e.message}`)
     }
 }

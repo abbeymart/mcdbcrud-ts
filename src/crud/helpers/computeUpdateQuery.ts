@@ -1,12 +1,8 @@
 import {
-    ActionParamsType,
-    ActionParamType,
-    MultiUpdateQueryResult,
-    QueryParamType, UpdateQueryObject,
-    UpdateQueryResult
-} from "../types";
-import { computeWhereQuery } from "./computeWhereQuery";
-import { camelToUnderscore, isEmptyObject } from "../utils";
+    ActionParamsType, ActionParamType, MultiUpdateQueryResult, QueryParamType, UpdateQueryObject, UpdateQueryResult
+}                                         from "../types";
+import {computeWhereQuery}                from "./computeWhereQuery";
+import {camelToUnderscore, isEmptyObject} from "../utils";
 
 const errMessage = (message: string) => {
     return {
@@ -77,12 +73,11 @@ export function computeUpdateQuery(tableName: string, actionParams: ActionParams
             message           : "success"
         }
     } catch (e) {
-        console.error(e)
-        throw new Error(e.message)
+        return errMessageUpdates(`Select-query: ${e.message}`)
     }
 }
 
-// computeUpdateQueryById function computes update SQL script by recordId. It returns updateScript, updateValues any and/or err error
+// computeUpdateQueryById function computes update SQL-script by recordId. It returns updateScript, updateValues any and/or err error
 export function computeUpdateQueryById(tableName: string, actionParam: ActionParamType, recordId: string): UpdateQueryResult {
     try {
         // validate inputs
@@ -122,12 +117,11 @@ export function computeUpdateQueryById(tableName: string, actionParam: ActionPar
             message          : "success"
         }
     } catch (e) {
-        console.error(e)
-        throw new Error(e.message)
+        return errMessage(`Select-query: ${e.message}`)
     }
 }
 
-// computeUpdateQueryByIds function computes update SQL script by recordIds. It returns updateScript, updateValues any and/or err error
+// computeUpdateQueryByIds function computes update SQL-script by recordIds. It returns updateScript, updateValues any and/or err error
 export function computeUpdateQueryByIds(tableName: string, actionParam: ActionParamType, recordIds: Array<string>): UpdateQueryResult {
     try {
         // validate inputs
@@ -173,8 +167,7 @@ export function computeUpdateQueryByIds(tableName: string, actionParam: ActionPa
             message          : "success"
         }
     } catch (e) {
-        console.error(e)
-        throw new Error(e.message)
+        return errMessage(`Select-query: ${e.message}`)
     }
 }
 
@@ -223,8 +216,7 @@ export function computeUpdateQueryByParam(tableName: string, actionParam: Action
             message          : "success"
         }
     } catch (e) {
-        console.error(e)
-        throw new Error(e.message)
+        return errMessage(`Select-query: ${e.message}`)
     }
 }
 

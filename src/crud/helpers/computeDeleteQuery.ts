@@ -1,6 +1,6 @@
-import { DeleteQueryResult, QueryParamType } from "../types";
-import { computeWhereQuery } from "./computeWhereQuery";
-import { isEmptyObject } from "../utils";
+import {DeleteQueryResult, QueryParamType} from "../types";
+import {computeWhereQuery}                 from "./computeWhereQuery";
+import {isEmptyObject}                     from "../utils";
 
 const errMessage = (message: string) => {
     return {
@@ -13,7 +13,7 @@ const errMessage = (message: string) => {
     }
 }
 
-// computeDeleteQueryById function computes delete SQL script by id
+// computeDeleteQueryById function computes delete SQL-script by id
 export function computeDeleteQueryById(tableName: string, recordId: string): DeleteQueryResult {
     try {
 
@@ -32,11 +32,11 @@ export function computeDeleteQueryById(tableName: string, recordId: string): Del
             message          : "success"
         }
     } catch (e) {
-        return errMessage(e.message)
+        return errMessage(`Delete-query: ${e.message}`)
     }
 }
 
-// computeDeleteQueryByIds function computes delete SQL script by ids
+// computeDeleteQueryByIds function computes delete SQL-script by ids
 export function computeDeleteQueryByIds(tableName: string, recordIds: Array<string>): DeleteQueryResult {
     try {
         // validate inputs
@@ -65,11 +65,11 @@ export function computeDeleteQueryByIds(tableName: string, recordIds: Array<stri
             message          : "success"
         }
     } catch (e) {
-        return errMessage(e.message)
+        return errMessage(`Delete-query: ${e.message}`)
     }
 }
 
-// computeDeleteQueryByParam function computes delete SQL script by parameter specifications
+// computeDeleteQueryByParam function computes delete SQL-script by query-parameter specifications
 export function computeDeleteQueryByParam(tableName: string, queryParams: QueryParamType): DeleteQueryResult {
     try {
         // validate inputs
@@ -95,6 +95,6 @@ export function computeDeleteQueryByParam(tableName: string, queryParams: QueryP
             message          : "success"
         }
     } catch (e) {
-        return errMessage(e.message)
+        return errMessage(`Delete-query: ${e.message}`)
     }
 }

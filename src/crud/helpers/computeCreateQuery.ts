@@ -1,5 +1,5 @@
-import { ActionParamsType, CreateQueryResult } from "../types";
-import { camelToUnderscore } from "../utils";
+import {ActionParamsType, CreateQueryResult} from "../types";
+import {camelToUnderscore}                   from "../utils";
 
 const errMessage = (message: string) => {
     return {
@@ -76,6 +76,6 @@ export function computeCreateQuery(tableName: string, actionParams: ActionParams
             message          : "success."
         }
     } catch (e) {
-        return errMessage(e.message)
+        return errMessage(`Create-query: ${e.message}`)
     }
 }

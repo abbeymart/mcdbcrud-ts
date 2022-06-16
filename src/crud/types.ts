@@ -5,9 +5,9 @@
  * @Description: CRUD types
  */
 
-import {AuditLog} from "../auditlog";
+import {AuditLog}        from "../auditlog";
 import {ResponseMessage} from "@mconnect/mcresponse";
-import {Pool} from "pg";
+import {Pool}            from "pg";
 
 export interface ObjectRefType {
     [key: string]: any;
@@ -261,6 +261,7 @@ export interface ActionParamTaskType {
     recordIds: Array<string>;
 }
 
+// AppParamsType is the type for validating app-access
 export interface AppParamsType {
     appId: string;
     accessKey: string;

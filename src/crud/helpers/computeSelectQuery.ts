@@ -1,6 +1,6 @@
-import { ActionParamType, CrudOptionsType, QueryParamType, SelectQueryResult } from "../types";
-import { camelToUnderscore, isEmptyObject } from "../utils";
-import { computeWhereQuery } from "./computeWhereQuery";
+import {ActionParamType, CrudOptionsType, QueryParamType, SelectQueryResult} from "../types";
+import {camelToUnderscore, isEmptyObject}                                    from "../utils";
+import {computeWhereQuery}                                                   from "./computeWhereQuery";
 
 const errMessage = (message: string) => {
     return {
@@ -35,7 +35,6 @@ export function computeSelectQueryAll(modelRef: ActionParamType, tableName: stri
             }
         }
         let selectQuery = `SELECT ${fieldText} FROM ${tableName}`
-        const selectValues: Array<any> = []
 
         // adjust selectQuery for skip and limit options
         if (options.limit && options.limit > 0) {
@@ -48,14 +47,14 @@ export function computeSelectQueryAll(modelRef: ActionParamType, tableName: stri
         return {
             selectQueryObject: {
                 selectQuery: selectQuery,
-                fieldValues: selectValues,
+                fieldValues: [],
                 fieldNames : fieldNames,
             },
             ok               : true,
             message          : "success"
         }
     } catch (e) {
-        return errMessage(e.message)
+        return errMessage(`Select-query: ${e.message}`)
     }
 }
 
@@ -79,7 +78,6 @@ export function computeSelectQueryById(modelRef: ActionParamType, tableName: str
             }
         }
         let selectQuery = `SELECT ${fieldText} FROM ${tableName} WHERE id=$1`
-        const selectValues = [recordId]
 
         // adjust selectQuery for skip and limit options
         if (options.limit && options.limit > 0) {
@@ -92,15 +90,14 @@ export function computeSelectQueryById(modelRef: ActionParamType, tableName: str
         return {
             selectQueryObject: {
                 selectQuery: selectQuery,
-                fieldValues: selectValues,
+                fieldValues: [recordId],
                 fieldNames : fieldNames,
             },
             ok               : true,
             message          : "success"
         }
     } catch (e) {
-        console.error(e)
-        throw new Error(e.message)
+        return errMessage(`Select-query: ${e.message}`)
     }
 }
 
@@ -155,8 +152,7 @@ export function computeSelectQueryByIds(modelRef: ActionParamType, tableName: st
             message          : "success"
         }
     } catch (e) {
-        console.error(e)
-        throw new Error(e.message)
+        return errMessage(`Select-query: ${e.message}`)
     }
 }
 
@@ -189,7 +185,6 @@ export function computeSelectQueryByParams(modelRef: ActionParamType, tableName:
 
         // append where-query-scripts
         selectQuery += whereQueryObject.whereQuery
-        const fieldValues = whereQueryObject.fieldValues
 
         // adjust selectQuery for skip and limit options
         if (options.limit && options.limit > 0) {
@@ -202,14 +197,13 @@ export function computeSelectQueryByParams(modelRef: ActionParamType, tableName:
         return {
             selectQueryObject: {
                 selectQuery: selectQuery,
-                fieldValues: fieldValues,
+                fieldValues: whereQueryObject.fieldValues,
                 fieldNames : fieldNames,
             },
             ok               : true,
             message          : "success"
         }
     } catch (e) {
-        console.error(e)
-        throw new Error(e.message)
+        return errMessage(`Select-query: ${e.message}`)
     }
 }
