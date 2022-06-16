@@ -219,7 +219,3 @@ export function computeUpdateQueryByParam(tableName: string, actionParam: Action
         return errMessage(`Select-query: ${e.message}`)
     }
 }
-
-
-
-

@@ -1,5 +1,5 @@
 import {ActionParamsType, CreateQueryResult} from "../types";
-import {camelToUnderscore}                   from "../utils";
+import {camelToUnderscore} from "../utils";
 
 const errMessage = (message: string) => {
     return {
@@ -18,7 +18,7 @@ export function computeCreateQuery(tableName: string, actionParams: ActionParams
     try {
         // validate inputs
         if (tableName === "" || actionParams.length < 1) {
-            return errMessage("tableName and actionParams are required.")
+            return errMessage("tableName and actionParams(records) are required.")
         }
         // declare variable for create/insert query
         let createQuery: string
@@ -35,7 +35,6 @@ export function computeCreateQuery(tableName: string, actionParams: ActionParams
             fieldCount += 1
             fieldNames.push(fieldName)
             const fieldNameUnderscore = camelToUnderscore(fieldName)
-            // fieldNameUnderscore = fieldNameUnderscore.includes("_") ? `'${fieldNameUnderscore}'` : `${fieldNameUnderscore}`
             fieldNamesUnderscore.push(fieldNameUnderscore)
             itemQuery += `${fieldNameUnderscore}`
             itemValuePlaceholder += `$${fieldCount}`
