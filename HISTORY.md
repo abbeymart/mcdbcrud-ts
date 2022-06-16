@@ -2,6 +2,11 @@
 
 ## Version 0.2.0
 
+- Release date: June 18, 2022
+- Refactor package-types-methods-v0.3.0
+
+## Version 0.2.0
+
 - Release date: May 18, 2022
 - Updated deps
 

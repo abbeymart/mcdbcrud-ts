@@ -40,14 +40,6 @@ class AuditLog {
         this.auditTable = auditTable;
     }
 
-    get getAuditTable() {
-        return this.auditTable
-    }
-
-    get getAuditDb() {
-        return this.dbHandle
-    }
-
     async createLog(tableName: string, logRecords: any, userId: string): Promise<ResponseMessage> {
         const dbCheck = checkDb(this.dbHandle);
         if (dbCheck.code !== "success") {
@@ -77,7 +69,7 @@ class AuditLog {
 
         try {
             // insert audit record
-            const queryText = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at) VALUES ($1, $2, $3, $4, $5);`
+            const queryText = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at) VALUES($1, $2, $3, $4, $5);`
             const values = [tableName, logRecords, AuditLogTypes.CREATE, userId, new Date()]
             const query = {
                 text  : queryText,
@@ -138,7 +130,7 @@ class AuditLog {
 
         try {
             // insert audit record
-            const queryText = "INSERT INTO " + this.auditTable + " (table_name, log_records, new_log_records, log_type, log_by, log_at ) VALUES ($1, $2, $3, $4, $5, $6);"
+            const queryText = `INSERT INTO ${this.auditTable}(table_name, log_records, new_log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5, $6);`
             const values = [tableName, logRecords, newLogRecords, AuditLogTypes.UPDATE, userId, new Date()]
             const query = {
                 text  : queryText,
@@ -195,10 +187,10 @@ class AuditLog {
             let queryText: string
             let values: Array<any>
             if (userId) {
-                queryText = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_by, log_at ) VALUES ($1, $2, $3, $4, $5);"
+                queryText = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`
                 values = [tableName, logRecords, AuditLogTypes.READ, userId, new Date()]
             } else {
-                queryText = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_at ) VALUES ($1, $2, $3, $4);"
+                queryText = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_at ) VALUES($1, $2, $3, $4);"
                 values = [tableName, logRecords, AuditLogTypes.READ, new Date()]
             }
             const query = {
@@ -256,7 +248,7 @@ class AuditLog {
 
         try {
             // insert audit record
-            const queryText = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_by, log_at ) VALUES ($1, $2, $3, $4, $5);"
+            const queryText = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`
             const values = [tableName, logRecords, AuditLogTypes.DELETE, userId, new Date()]
             const query = {
                 text  : queryText,
@@ -306,10 +298,10 @@ class AuditLog {
             let queryText: string
             let values: Array<any>
             if (userId) {
-                queryText = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_by, log_at ) VALUES ($1, $2, $3, $4, $5);"
+                queryText = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`
                 values = [tableName, logRecords, AuditLogTypes.LOGIN, userId, new Date()]
             } else {
-                queryText = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_at ) VALUES ($1, $2, $3, $4);"
+                queryText = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_at ) VALUES($1, $2, $3, $4);"
                 values = [tableName, logRecords, AuditLogTypes.LOGIN, new Date()]
             }
 
@@ -362,7 +354,7 @@ class AuditLog {
 
         try {
             // insert audit record
-            const queryText = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_by, log_at ) VALUES ($1, $2, $3, $4, $5);"
+            const queryText = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`
             const values = [tableName, logRecords, AuditLogTypes.LOGOUT, userId, new Date()]
             const query = {
                 text  : queryText,
@@ -431,7 +423,7 @@ class AuditLog {
                 }
 
                 query = {
-                    text  : "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_by, log_at ) VALUES ($1, $2, $3, $4, $5);",
+                    text  : `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`,
                     values: [tableName, logRecords, AuditLogTypes.CREATE, userId, new Date()],
                 }
                 break;
@@ -464,7 +456,7 @@ class AuditLog {
                     });
                 }
                 query = {
-                    text  : "INSERT INTO " + this.auditTable + " (table_name, log_records, new_log_records, log_type, log_by, log_at ) VALUES ($1, $2, $3, $4, $5, $6);",
+                    text  : `INSERT INTO ${this.auditTable}(table_name, log_records, new_log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5, $6);`,
                     values: [tableName, logRecords, newLogRecords, AuditLogTypes.UPDATE, userId, new Date()],
                 }
                 break;
@@ -495,7 +487,7 @@ class AuditLog {
                 }
 
                 query = {
-                    text  : "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_by, log_at ) VALUES ($1, $2, $3, $4, $5);",
+                    text  : `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`,
                     values: [tableName, logRecords, AuditLogTypes.REMOVE, userId, new Date()],
                 }
                 break;
@@ -524,10 +516,10 @@ class AuditLog {
                 let queryTextRead: string
                 let valuesRead: Array<any>
                 if (userId) {
-                    queryTextRead = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_by, log_at ) VALUES ($1, $2, $3, $4, $5);"
+                    queryTextRead = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`
                     valuesRead = [tableName, logRecords, AuditLogTypes.READ, userId, new Date()]
                 } else {
-                    queryTextRead = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_at ) VALUES ($1, $2, $3, $4);"
+                    queryTextRead = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_at ) VALUES($1, $2, $3, $4);"
                     valuesRead = [tableName, logRecords, AuditLogTypes.READ, new Date()]
                 }
                 query = {
@@ -552,10 +544,10 @@ class AuditLog {
                 let queryTextLogin: string
                 let valuesLogin: Array<any>
                 if (userId) {
-                    queryTextLogin = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_by, log_at ) VALUES ($1, $2, $3, $4, $5);"
+                    queryTextLogin = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`
                     valuesLogin = [tableName, logRecords, AuditLogTypes.LOGIN, userId, new Date()]
                 } else {
-                    queryTextLogin = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_at ) VALUES ($1, $2, $3, $4);"
+                    queryTextLogin = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_at ) VALUES($1, $2, $3, $4);"
                     valuesLogin = [tableName, logRecords, AuditLogTypes.LOGIN, new Date()]
                 }
                 query = {
@@ -581,7 +573,7 @@ class AuditLog {
                 }
                 tableName = tableName || "users"
                 query = {
-                    text  : "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_by, log_at ) VALUES ($1, $2, $3, $4, $5);",
+                    text  : `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`,
                     values: [tableName, logRecords, AuditLogTypes.LOGOUT, userId, new Date()],
                 }
                 break;

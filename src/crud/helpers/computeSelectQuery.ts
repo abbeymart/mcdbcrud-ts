@@ -59,7 +59,7 @@ export function computeSelectQueryAll(modelRef: ActionParamType, tableName: stri
     }
 }
 
-// computeSelectQueryById compose select SQL script by id
+// computeSelectQueryById compose select SQL-script by id
 export function computeSelectQueryById(modelRef: ActionParamType, tableName: string, recordId: string, options: CrudOptionsType = {}): SelectQueryResult {
     try {
         // validate inputs
@@ -104,7 +104,7 @@ export function computeSelectQueryById(modelRef: ActionParamType, tableName: str
     }
 }
 
-// computeSelectQueryByIds compose select SQL script by ids
+// computeSelectQueryByIds compose select SQL-script by ids
 export function computeSelectQueryByIds(modelRef: ActionParamType, tableName: string, recordIds: Array<string>, options: CrudOptionsType = {}): SelectQueryResult {
     try {
         // validate inputs

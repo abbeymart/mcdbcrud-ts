@@ -6,5 +6,7 @@
 
 ## Installation
 ```js
+
 npm i @mconnect/mcdbcrud
+
 ```
