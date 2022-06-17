@@ -290,7 +290,7 @@ export class Crud {
             let recRes: QueryResult
             // let recFields: Array<string>
 
-            switch (by) {
+            switch (by.toLowerCase()) {
                 case "id":
                     // select by id
                     if (this.recordIds.length === 1) {
@@ -316,29 +316,8 @@ export class Crud {
                     // get records
                     recRes = await this.appDb.query(selectQueryResult.selectQueryObject.selectQuery, selectQueryResult.selectQueryObject.fieldValues)
                     break;
-                case "queryParams":
-                    // get records by params
-                    selectQueryResult = computeSelectQueryByParams(this.modelRef, this.table, this.queryParams, {
-                        skip : this.skip,
-                        limit: this.limit
-                    })
-                    if (!selectQueryResult.ok) {
-                        return getResMessage("readError", {
-                            message: selectQueryResult.message,
-                            value  : {
-                                selectQuery: selectQueryResult.selectQueryObject.selectQuery,
-                                fieldValues: selectQueryResult.selectQueryObject.fieldValues,
-                                modelRef   : this.modelRef,
-                                table      : this.table,
-                                queryParams: this.queryParams,
-                            }
-                        })
-                    }
-                    // query records
-                    recRes = await this.appDb.query(selectQueryResult.selectQueryObject.selectQuery, selectQueryResult.selectQueryObject.fieldValues)
-                    break;
                 case "queryparams":
-                    // get records by params
+                    // get records by query-params
                     selectQueryResult = computeSelectQueryByParams(this.modelRef, this.table, this.queryParams, {
                         skip : this.skip,
                         limit: this.limit
