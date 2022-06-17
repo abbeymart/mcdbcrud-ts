@@ -123,7 +123,7 @@ export class Crud {
         this.accessDb = options && options.accessDb ? options.accessDb : this.appDb;
         this.auditDb = options && options.auditDb ? options.auditDb : this.appDb;
         this.serviceDb = options && options.serviceDb ? options.serviceDb : this.appDb;
-        this.maxQueryLimit = options && options.maxQueryLimit ? options.maxQueryLimit : 100000;
+        this.maxQueryLimit = options && options.maxQueryLimit ? options.maxQueryLimit : 10000;
         this.logCrud = options && options.logCrud ? options.logCrud : false;
         this.logCreate = options && options.logCreate ? options.logCreate : false;
         this.logUpdate = options && options.logUpdate ? options.logUpdate : false;
@@ -189,43 +189,62 @@ export class Crud {
         }
     }
 
+    // implement toString method
+    protected toString = (): string => `CRUD Instance Information: ${this}`
+
     // ownerRecordsCount method query DB-tables and returns ownerRecords (by userId), and ok and message
     async ownerRecordsCount(): Promise<OwnerRecordCountResultType> {
-        // count owner-records
-        const ownerScript = `SELECT COUNT(*) AS ownerrows FROM ${this.table} WHERE created_by = $1`
-        const ownerRowsRes = await this.appDb.query(ownerScript, [this.userInfo.userId])
-        const ownerRows = ownerRowsRes.rows[0].ownerrows
-        if (ownerRows < 1) {
+        try {
+            // count owner-records
+            const ownerScript = `SELECT COUNT(*) AS ownerrows FROM ${this.table} WHERE created_by = $1`
+            const ownerRowsRes = await this.appDb.query(ownerScript, [this.userInfo.userId])
+            const ownerRows = ownerRowsRes.rows[0].ownerrows
+            if (ownerRows < 1) {
+                return {
+                    ownerRecords: 0,
+                    ok          : false,
+                    message     : "Owner records count error - no records found",
+                }
+            }
+            return {
+                ownerRecords: Number(ownerRows),
+                ok          : true,
+                message     : "success",
+            }
+        } catch (e) {
             return {
                 ownerRecords: 0,
                 ok          : false,
-                message     : "Owner records count error - no records found",
+                message     : `${e.message}`,
             }
-        }
-        return {
-            ownerRecords: ownerRows,
-            ok          : true,
-            message     : "success",
         }
     }
 
     // recordsCount method query DB-tables and returns totalRecords (by userId), and ok and message
     async recordsCount(): Promise<RecordCountResultType> {
-        // totalRecordsCount from the table
-        const countQuery = `SELECT COUNT(*) AS totalrows FROM ${this.table}`
-        const countRowsRes = await this.appDb.query(countQuery)
-        const totalRows = countRowsRes.rows[0].totalrows
-        if (totalRows < 1) {
+        try {
+            // totalRecordsCount from the table
+            const countQuery = `SELECT COUNT(*) AS totalrows FROM ${this.table}`
+            const countRowsRes = await this.appDb.query(countQuery)
+            const totalRows = countRowsRes.rows[0].totalrows
+            if (totalRows < 1) {
+                return {
+                    totalRecords: 0,
+                    ok          : false,
+                    message     : "Total records count error - no records found",
+                }
+            }
+            return {
+                totalRecords: totalRows,
+                ok          : true,
+                message     : "success",
+            }
+        } catch (e) {
             return {
                 totalRecords: 0,
                 ok          : false,
-                message     : "Total records count error - no records found",
+                message     : `${e.message}`,
             }
-        }
-        return {
-            totalRecords: totalRows,
-            ok          : true,
-            message     : "success",
         }
     }
 
@@ -233,17 +252,22 @@ export class Crud {
     computeQueryRecords(recRes: QueryResult<any>): ActionParamsType {
         // compute records
         let records: ActionParamsType = [];
-        // record-fields
-        const recFields = recRes.fields.map(field => field.name)
-        // convert record-rows to array-of-records(objects)
-        for (const row of recRes.rows) {
-            let record: ActionParamType = {}
-            for (const recField of recFields) {
-                record[toCamelCase(recField)] = row[recField]
+        try {
+            // record-fields
+            const recFields = recRes.fields.map(field => field.name)
+            // convert record-rows to array-of-records(objects)
+            for (const row of recRes.rows) {
+                let record: ActionParamType = {}
+                for (const recField of recFields) {
+                    record[toCamelCase(recField)] = row[recField]
+                }
+                records.push(record)
             }
-            records.push(record)
+            return records
+        } catch (e) {
+            throw e
+            // return []
         }
-        return records
     }
 
     // getCurrentRecords fetch records by recordIds, queryParams or all limited by this.limit and this.skip, if applicable
