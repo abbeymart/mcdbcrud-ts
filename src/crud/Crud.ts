@@ -403,7 +403,7 @@ export class Crud {
                 return [];
             }
             const queryText = `SELECT service_id, role_id, service_category, can_read, can_create, can_update, can_delete, can_crud FROM ${this.roleTable}`
-            // ids-value
+            // roleIds-value
             const idLen = roleIds.length
             let recIds = "("
             for (let i = 0; i < idLen; i++) {
@@ -606,18 +606,18 @@ export class Crud {
             }
 
             // filter the roleServices by categories ("table" and "document"/"record")
-            const tableFunc = (item: RoleServiceResponseType): boolean => {
+            const tableAccessFunc = (item: RoleServiceResponseType): boolean => {
                 return (item.serviceId === tableId);
             }
-            const recFunc = (item: RoleServiceResponseType): boolean => {
+            const recordAccessFunc = (item: RoleServiceResponseType): boolean => {
                 return (recordIds.includes(item.serviceId));
             }
 
             let roleTables: Array<RoleServiceResponseType> = [];
             let roleRecords: Array<RoleServiceResponseType> = [];
             if (roleServices.length > 0) {
-                roleTables = roleServices.filter(tableFunc);
-                roleRecords = roleServices.filter(recFunc);
+                roleTables = roleServices.filter(tableAccessFunc);
+                roleRecords = roleServices.filter(recordAccessFunc);
             }
 
             // helper functions
@@ -637,19 +637,19 @@ export class Crud {
                 return item.canRead;
             }
 
-            const roleUpdateFunc = (it1: string, it2: RoleServiceResponseType): boolean => {
+            const updateRoleFunc = (it1: string, it2: RoleServiceResponseType): boolean => {
                 return (it2.serviceId === it1 && it2.canUpdate);
             }
 
-            const roleDeleteFunc = (it1: string, it2: RoleServiceResponseType): boolean => {
+            const deleteRoleFunc = (it1: string, it2: RoleServiceResponseType): boolean => {
                 return (it2.serviceId === it1 && it2.canDelete);
             }
 
-            const roleReadFunc = (it1: string, it2: RoleServiceResponseType): boolean => {
+            const readRoleFunc = (it1: string, it2: RoleServiceResponseType): boolean => {
                 return (it2.serviceId === it1 && it2.canRead);
             }
 
-            // wrapper function for the role<Type>Func
+            // wrapper function for the role<Type>Func | check if record-id(it1) is permitted
             const recordFunc = (it1: string, roleFunc: RoleFuncType): boolean => {
                 return roleRecords.some((it2: RoleServiceResponseType) => roleFunc(it1, it2));
             }
@@ -674,7 +674,7 @@ export class Crud {
                         tablePermitted = roleTables.every(canUpdateFunc);
                     }
                     // docs/records level access: every recordIds must have at least a match in the roleRecords
-                    recPermitted = recordIds.every(it1 => recordFunc(it1, roleUpdateFunc));
+                    recPermitted = recordIds.every(it1 => recordFunc(it1, updateRoleFunc));
                     break;
                 case TaskTypes.DELETE:
                     // table level access
@@ -682,7 +682,7 @@ export class Crud {
                         tablePermitted = roleTables.every(canDeleteFunc);
                     }
                     // docs/records level access: every recordIds must have at least a match in the roleRecords
-                    recPermitted = recordIds.every(it1 => recordFunc(it1, roleDeleteFunc));
+                    recPermitted = recordIds.every(it1 => recordFunc(it1, deleteRoleFunc));
                     break;
                 case TaskTypes.REMOVE:
                     // table level access
@@ -690,7 +690,7 @@ export class Crud {
                         tablePermitted = roleTables.every(canDeleteFunc);
                     }
                     // docs/records level access: every recordIds must have at least a match in the roleRecords
-                    recPermitted = recordIds.every(it1 => recordFunc(it1, roleDeleteFunc));
+                    recPermitted = recordIds.every(it1 => recordFunc(it1, deleteRoleFunc));
                     break;
                 case TaskTypes.READ:
                     // table level access
@@ -698,7 +698,7 @@ export class Crud {
                         tablePermitted = roleTables.every(canReadFunc);
                     }
                     // docs/records level access: every recordIds must have at least a match in the roleRecords
-                    recPermitted = recordIds.every(it1 => recordFunc(it1, roleReadFunc));
+                    recPermitted = recordIds.every(it1 => recordFunc(it1, readRoleFunc));
                     break;
                 default:
                     return getResMessage("unAuthorized", {message: `Unknown/unsupported task-type (${taskType}`});
