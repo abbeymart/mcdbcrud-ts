@@ -17,7 +17,7 @@ import {
     ModelOptionsType,
     TaskTypes
 } from "..";
-import { isEmptyObject } from "./utils";
+import { isEmptyObject } from "./validate";
 import { computeCreateQuery } from "./helpers/computeCreateQuery";
 import {
     computeUpdateQuery,
@@ -29,8 +29,7 @@ import {
 class SaveRecord extends Crud {
     protected modelOptions: ModelOptionsType;
 
-    constructor(params: CrudParamsType,
-                options: CrudOptionsType = {}) {
+    constructor(params: CrudParamsType, options: CrudOptionsType = {}) {
         super(params, options);
         // Set specific instance properties
         this.modelOptions = options?.modelOptions && !isEmptyObject(options.modelOptions) ? options.modelOptions : {

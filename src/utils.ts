@@ -6,6 +6,7 @@
 
 import * as localforage from "localforage";
 import {getResMessage} from "@mconnect/mcresponse";
+import {isEmpty, UserInfoType, ObjectType} from "./crud";
 
 // types
 interface ValueObject {
@@ -34,310 +35,184 @@ interface ResponseMessage {
     value: ValueType;
 }
 
-type ItemStateType = string | number | object | string[] | number[] | object[];
+// types
+interface Options {
+    type?: string;
+    language?: string;
+}
 
+export type ItemStateType = string | number | ObjectType | string[] | number[] | ObjectType[] | null;
 
-export default {
-    getLanguage(userLang = "en-US"): string {
-        // Define/set default language variable
-        let defaultLang = "en-US";
-        // Set defaultLang to current userLang, set from the UI
-        if (userLang) {
-            defaultLang = userLang;
-        }
-        return defaultLang;
-    },
-    getLocale(localeFiles: Locale, options: Options = {}) {
-        // validate localeFiles as an object
-        if (typeof localeFiles !== "object" || Object.keys(localeFiles).length < 1 ||
-            Object.values(localeFiles).length < 1) {
-            return {
-                code   : "paramsError",
-                message: "Locale files should be an object and not empty",
-            };
-        }
+export interface GetNamesType {
+    firstname?: string;
+    middlename?: string;
+    lastname?: string;
+}
 
-        // const localeType = options && options.type ? options.type : "";
-        const language = options && options.language ? options.language : "en-US";
+export function getLanguage(userLang = "en-US"): string {
+    // Define/set default language variable
+    let defaultLang = "en-US";
+    // Set defaultLang to current userLang, set from the UI
+    if (userLang) {
+        defaultLang = userLang;
+    }
+    return defaultLang;
+}
 
-        // set the locale file contents
-        return localeFiles[language];
+export function getLocale(localeFiles: Locale, options: Options = {}): ValueType {
+    // validate localeFiles as an object
+    if (typeof localeFiles !== "object" || isEmpty(localeFiles)) {
+        throw new Error("Locale files should be an object and not empty")
+    }
 
-    },
-    getParamsMessage(msgObject: MessageObject): ResponseMessage {
-        let messages = "";
-        Object.entries(msgObject).forEach(([key, msg]) => {
-            messages = messages ? `${messages} | ${key} : ${msg}` : `${key} : ${msg}`;
-        });
+    // const localeType = options && options.type ? options.type : "";
+    const language = options && options.language ? options.language : "en-US";
+
+    // set the locale file contents
+    return localeFiles[language];
+
+}
+
+export function getParamsMessage(msgObject: MessageObject): ResponseMessage {
+    if (typeof msgObject !== "object") {
         return getResMessage("validateError", {
-            message: messages,
+            message: "Cannot process non-object-value",
         });
-    },
-    shortString(str: string, maxLength: number): string {
-        return str.toString().length > maxLength ? str.toString().slice(0, maxLength) + "..." : str.toString();
-    },
-    strToBool(val: string | number = "n"): boolean {
-        const strVal = val.toString().toLowerCase();
-        if (strVal === "true" || strVal === "t" || strVal === "yes" || strVal === "y") {
-            return true;
-        } else {
-            return Number(strVal) > 0;
+    }
+    let messages = "";
+    Object.entries(msgObject).forEach(([key, msg]) => {
+        messages = messages ? `${messages} | ${key} : ${msg}` : `${key} : ${msg}`;
+    });
+    return getResMessage("validateError", {
+        message: messages,
+    });
+}
+
+export function shortString(str: string, maxLength = 20): string {
+    return str.toString().length > maxLength ? str.toString().substr(0, maxLength) + "..." : str.toString();
+}
+
+export function strToBool(val: string | number = "n"): boolean {
+    const strVal = val.toString().toLowerCase();
+    if (strVal === "true" || strVal === "t" || strVal === "yes" || strVal === "y") {
+        return true;
+    } else {
+        return Number(strVal) > 0;
+    }
+}
+
+export async function userIpInfo(ipUrl = "https://ipinfo.io", options: ObjectType = {}): Promise<ObjectType> {
+    // Get the current user IP address Information
+    // TODO: use other method besides ipinfo.io, due to query limit/constraint (i.e. 429 error)
+    try {
+        // const reqH = options && options.headers? options. headers : {};
+        const reqHeaders = {"Content-Type": "application/json"};
+        options = Object.assign({}, options, {
+            method: "GET",
+            mode: "cors",
+            headers: reqHeaders,
+        });
+        const response = await fetch(ipUrl as RequestInfo, options as RequestInit);
+        let result = await response.json();
+        result = result ? JSON.parse(result) : null;
+        if (response.ok) {
+            return result;
         }
-    },
-    async userIpInfo(ipUrl = "https://ipinfo.io", options: object = {}): Promise<object> {
-        // Get the current user IP address Information
-        // TODO: use other method besides ipinfo.io, due to query limit (i.e. 429 error)
-        try {
-            // const reqH = options && options.headers? options. headers : {};
-            const reqHeaders = {"Content-Type": "application/json"};
-            options = Object.assign({}, options, {
-                method : "GET",
-                mode   : "cors",
-                headers: reqHeaders,
-            });
-            const response = await fetch(ipUrl, options);
-            let result = await response.json();
-            result = result ? JSON.parse(result) : null;
-            if (response.ok) {
-                return result;
-            }
-            throw new Error("Error fetching ip-address information: ");
-        } catch (error) {
-            console.log("Error fetching ip-address information: ", error);
-            throw new Error(error.message);
-        }
-    },
-    userBrowser() {
-        // push each browser property, as key/value pair, into userBrowser array variable
-        return navigator.userAgent;
-    },
-    currentUrlInfo(pathLoc: string) {
-        // this function returns the parts (array) and lastIndex of a URL/pathLocation
-        let parts: string[] = [];
-        let lastIndex = -1;
-        if (pathLoc) {
-            parts = pathLoc.toString().split("://")[1].split("/");
-            // get the last index
-            lastIndex = parts.lastIndexOf("new") || parts.lastIndexOf("detail") || parts.lastIndexOf("list");
-            return {
-                parts,
-                lastIndex,
-            };
-        }
+        throw new Error("Error fetching ip-address information: ");
+    } catch (error) {
+        console.log("Error fetching ip-address information: ", error);
+        throw new Error(error.message);
+    }
+}
+
+export function userBrowser() {
+    // push each browser property, as key/value pair, into userBrowser array variable
+    return navigator.userAgent;
+}
+
+export function currentUrlInfo(pathLoc: string) {
+    // this function returns the parts (array) and lastIndex of a URL/pathLocation
+    let parts: string[] = [];
+    let lastIndex = -1;
+    if (pathLoc) {
+        parts = pathLoc.toString().split("://")[1].split("/");
+        // get the last index
+        lastIndex = parts.lastIndexOf("new") || parts.lastIndexOf("detail") || parts.lastIndexOf("list");
         return {
             parts,
             lastIndex,
         };
-    },
-    getPath(req: Request): string {
-        let itemPath = req.url || "/mc";
-        itemPath = itemPath.split("/")[1];
-        return itemPath ? itemPath : "mc";
-    },
-    getFullName(firstName: string, lastName: string, middleName = ""): string {
-        if (firstName && middleName && lastName) {
-            return (firstName + " " + middleName + " " + lastName);
-        }
-        return (firstName + " " + lastName);
-    },
-    getNames(fullName: string) {
-        const nameParts = fullName.split("");
-        let firstName, lastName, middleName;
-        if (nameParts.length > 2) {
-            firstName = nameParts[0];
-            lastName = nameParts[2];
-            middleName = nameParts[1];
-            return {
-                firstName,
-                middleName,
-                lastName,
-            };
-        } else {
-            firstName = nameParts[0];
-            lastName = nameParts[1];
-            return {
-                firstName,
-                lastName,
-            };
-        }
-        // Return firstName, middleName and lastName based on fullName components ([0],[1],[2])
-    },
-    pluralize(n: number, itemName: string, itemPlural = ""): string {
-        // @TODO: retrieve plural for itemName from language dictionary {name: plural}
-        let itemNamePlural = "";
-        if (!itemPlural) {
-            itemNamePlural = "s"    // TODO: determine plural as s or es pr ies...
-            // itemNamePlural = mcPlurals[ itemName ];
-        } else {
-            itemNamePlural = itemPlural;
-        }
-        let result = `${n} ${itemName}`;
-        if (n > 1) {
-            result = `${n} ${itemName}${itemNamePlural}`;
-        }
-        return result;
-    },
-    // Validation functions
-    isProvided(param: string | number | object): boolean {
-        // Verify the Required status
-        // Validate that the item is not empty / null / undefined
-        return !(param === "" || param === null || param === undefined || Object.keys(param).length === 0);
-    },
-    isEven(num: number): boolean {
-        return Number.isFinite(num) && (num % 2 === 0);
-    },
-    isOdd(num: number): boolean {
-        return Number.isFinite(num) && (num % 2 !== 0);
-    },
-    isNumberDigit(num: number): boolean {
-        // Validate that param is a number (digit): 100 | 99 | 33 | 44 | 200
-        // \d => [0-9]
-        const numberPattern = /^\d+$/;
-        return numberPattern.test(num.toString());
-    },
-    isNumberFloat(num: number): boolean {
-        // Validate that param is a number (float): 0.90 | 99.9 | 33.3 | 44.40
-        const numberPattern = /^(\d)+([.])?(\d)*$/;
-        return numberPattern.test(num.toString());
-    },
-    isObjectType(param: object): boolean {
-        "use strict";
-        // Validate param is an object, {}
-        return (typeof param === "object" && !Array.isArray(param));
-    },
-    isArrayType(param: []): boolean {
-        "use strict";
-        // Validate param is an object, []
-        return (typeof param === "object" && Array.isArray(param));
-    },
-    isStringChar(param: string): boolean {
-        // Validate that param is a string (characters only) -- use regEx
-        const charRegEx = /^[a-zA-Z&$_-]+$/;
-        return charRegEx.test(param);
-    },
-    isStringAlpha(param: string): boolean {
-        // Validate that param is a string (alphanumeric, chars/numbers only)
-        const alphaNumericPattern = /^[a-zA-Z\d-_]+$/;
-        return alphaNumericPattern.test(param);
-    },
-    isUsername(param: string): boolean {
-        "use strict";
-        const usernamePattern = /^([\w\d_])+$/; // alphanumeric, underscore, no space
-        return usernamePattern.test(param);
-    },
-    isEmpty(param: string | number | object | string[] | number[] | object[]): boolean {
-        "use strict";
-        return (param === "" || param === null || param === undefined ||
-            (typeof param === "object" && !Array.isArray(param) && Object.keys(param).length === 0) ||
-            (typeof param === "object" && Array.isArray(param) && param.length === 0));
-    },
-    isEmptyObject(val: object): boolean {
-        return !(Object.keys(val).length > 0 && Object.values(val).length > 0);
-    },
-    isNull(infoItem: null): boolean {
-        "use strict";
-        return infoItem === null;
-    },
-    isEmail(param: string): boolean {
-        const testPattern = /^[\da-zA-Z]+([\da-zA-Z]*[-._+])*[\da-zA-Z]+@[\da-zA-Z]+([-.][\da-zA-Z]+)*([\da-zA-Z]*[.])[a-zA-Z]{2,6}$/;
-        // const testPattern = /^[0-9a-zA-Z]+([\-._][0-9a-zA-Z]+)*@[0-9a-zA-Z]+([\-.][0-9a-zA-Z]+)*([.])[a-zA-Z]{2,6}$/;
-        return testPattern.test(param);
-    },
-    isPassword(param: string): boolean {
-        const testPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d.*)(?=.*\W.*)[a-zA-Z\d\S]{6,15}$/;
-        return testPattern.test(param);
-    },
-    isNumberOnRange(num: number, min: number, max: number): boolean {
-        if ((this.isNumberDigit(num) || this.isNumberFloat(num)) && (min < max)) {
-            return (num >= min && num <= max)
-        }
-        return false;
-    },
-    isPhone(param: string): boolean {
-        const phonePattern = /^([1-9]{1,3})?[-. ]?(\(\d{3}\)?[-. ]?|\d{3}?[-. ]?)?\d{3}?[-. ]?\d{4}$/;
-        return phonePattern.test(param);
-    },
-    isPostalCode(param: string): boolean {
-        const postCodePattern = /^[a-zA-Z\d]+(\s)?[a-zA-Z\d]*/;
-        return postCodePattern.test(param);
-    },
-    isPostalCodeUS(param: string): boolean {
-        const postCodePattern = /^[a-zA-Z\d]+(\s)?[a-zA-Z\d]*/;
-        return postCodePattern.test(param);
-    },
-    isPostalCodeCanada(param: string): boolean {
-        const postCodePattern = /^[a-zA-Z\d]+(\s)?[a-zA-Z\d]*/;
-        return postCodePattern.test(param);
-    },
-    isPostalCodeUK(param: string): boolean {
-        const postCodePattern = /^[a-zA-Z\d]+(\s)?[a-zA-Z\d]*/;
-        return postCodePattern.test(param);
-    },
-    isName(param: string): boolean {
-        const namePattern = /^[a-zA-Z"-]+(\s[a-zA-Z"-])*[a-zA-Z"-]*/;   // Abi Charles Africa America
-        return namePattern.test(param);
-    },
-    isURL(param: string): boolean {
-        // Abi Charles Africa America
-        const namePattern = /^[a-zA-Z\d\-\\_.:]+$/;
-        return namePattern.test(param);
+    }
+    return {
+        parts,
+        lastIndex,
+    };
+}
 
-    },
-    isBusinessNumber(param: string): boolean {
-        // business number format
-        const bnPattern = /^[\d-]+$/;
-        return bnPattern.test(param);
-    },
-    isStandardCode(param: string): boolean {
-        // Product Group | Body & Soul10
-        const standardCodePattern = /^[a-zA-Z\d]+[&\s\-_]*[a-zA-Z\d$#]*$/;
-        return standardCodePattern.test(param);
-    },
-    isCountryCode(param: string): boolean {
-        // langCode must be string of format en-US
-        const countryCodePattern = /^[a-z]{2}-[A-Z]{2}$/;
-        return countryCodePattern.test(param);
-    },
-    isLanguageCode(param: string): boolean {
-        // langCode must be string of format en-US
-        const langCodePattern = /^[a-z]{2}-[A-Z]{2}$/;
-        return langCodePattern.test(param);
-    },
-    isWordSpace(param: string): boolean {
-        // words with spaces and hyphens, no numbers
-        const wordSpacePattern = /^[a-zA-Z\d,()"._&]+[\s\-a-zA-Z\d,()"._&]*[a-zA-Z\d,()"._?]*$/;
-        return wordSpacePattern.test(param);
-    },
-    isLabelCode(param: string): boolean {
-        // firstName_middleName_lastName
-        const labelCodePattern = /^[a-zA-Z]+[_\-a-zA-Z]*[_a-z\d]*$/;
-        return labelCodePattern.test(param);
-    },
-    isErrorCode(param: string): boolean {
-        // error code format (AB10-100, AB900)
-        const errorCodePattern = /^[a-zA-Z\d]+-*\d*$/;
-        return errorCodePattern.test(param);
-    },
-    isPathName(param: string) {
-        // mysite.new_base.nicelook
-        const pathNamePattern = /^[a-zA-Z\d/]+[_a-zA-Z\d./]*[a-zA-Z\d/]*$/;
-        return pathNamePattern.test(param);
-    },
-    isNameNoSpace(param: string): boolean {
-        // JohnPaul
-        const nameNoSpacePattern = /[a-zA-Z]+/;
-        return nameNoSpacePattern.test(param);
-    },
-    isDescription(param: string): boolean {
-        "use strict";
-        const descPattern = /^[a-zA-Z\d\s\\.,:/()*_|\-!@#$%&]+$/; // Alphanumeric string with spaces, and
-        // (.,:/()*_-|!@)
-        return descPattern.test(param);
-    },
-    isCurrency(param: string): boolean {
-        const currencyPattern = /^[a-zA-Z#$]+$/;
-        return currencyPattern.test(param);
-    },
+export function getPath(req: Request): string {
+    let itemPath = req.url || "/mc";
+    itemPath = itemPath.split("/")[1];
+    return itemPath ? itemPath : "mc";
+}
+
+export function getFullName(firstName: string, lastName: string, middleName = ""): string {
+    if (firstName && middleName && lastName) {
+        return (firstName + " " + middleName + " " + lastName);
+    }
+    return (firstName + " " + lastName);
+}
+
+export function getNames(fullName: string): GetNamesType {
+    const nameParts = fullName.split("");
+    let firstname, lastname, middlename;
+    if (nameParts.length > 2) {
+        firstname = nameParts[0];
+        lastname = nameParts[2];
+        middlename = nameParts[1];
+        return {
+            firstname,
+            middlename,
+            lastname,
+        };
+    } else {
+        firstname = nameParts[0];
+        lastname = nameParts[1];
+        return {
+            firstname,
+            lastname,
+        };
+    }
+    // Return firstName, middleName and lastName based on fullName components ([0],[1],[2])
+}
+
+export function pluralize(n: number, itemName: string, itemPlural = ""): string {
+    // @TODO: retrieve plural for itemName from language dictionary {name: plural}
+    let itemNamePlural: string;
+    if (!itemPlural) {
+        itemNamePlural = "tbd"
+        // itemNamePlural = mcPlurals[ itemName ];
+    } else {
+        itemNamePlural = itemPlural;
+    }
+    let result = `${n} ${itemName}`;
+    if (n > 1) {
+        result = `${n} ${itemName}${itemNamePlural}`;
+    }
+    return result;
+}
+
+export function getAge(dateString: string): number {
+    const today = new Date();
+    const birthDate = new Date(dateString);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && birthDate.getDate() > today.getDate())) {
+        age--;
+    }
+    return age;
+}
+
+export const localStorageUtils = {
     // Web store functions:
     setCookie(cname: string, cvalue: string, exdays: number) {
         const d = new Date();
@@ -405,7 +280,7 @@ export default {
     async getItemState(itemKey: string): Promise<ItemStateType> {
         try {
             const mStore = this.mcStore();
-            const item: ItemStateType = await mStore.getItem(itemKey) || {},
+            const item: ItemStateType = await mStore.getItem(itemKey) || "",
                 expire = await mStore.getItem(`${itemKey}Expire`);
             if (!item || !expire) {
                 return "";
@@ -502,7 +377,7 @@ export default {
             return "";
         }
     },
-    async setCurrentUser(userInfo: object) {
+    async setCurrentUser(userInfo: UserInfoType) {
         try {
             const mStore = this.mcStore();
             await mStore.setItem("currentUser", userInfo);
@@ -518,10 +393,10 @@ export default {
             console.error("error removing localStorage item(removeCurrentUser): ", e.message);
         }
     },
-    async getCurrentUser(): Promise<object> {
+    async getCurrentUser(): Promise<UserInfoType> {
         try {
             const mStore = this.mcStore();
-            const item: object = await mStore.getItem("currentUser") || {};
+            const item: UserInfoType = await mStore.getItem("currentUser") || {};
             return item ? item : {};
         } catch (e) {
             console.error("error retrieving localStorage item(getCurrentUser): ", e.message);
@@ -554,5 +429,4 @@ export default {
             return "";
         }
     },
-
 }

@@ -3,6 +3,8 @@
  * @Company: mConnect.biz | @License: MIT
  * @Description: common validation functions
  */
+import {type} from "os";
+import {ObjectType} from "./types";
 
 export const isProvided = (param: any): boolean => {
     // Verify the Required status
@@ -65,9 +67,15 @@ export const isUsername = (param: string): boolean => {
 export const isEmpty = (param: any): boolean => {
     "use strict";
     return (param === '' || param === null || param === undefined ||
-        Object.keys(param).length === 0 ||
+        (typeof param === "object" && Object.keys(param).length === 0) ||
         (Array.isArray(param) && param.length === 0));
 };
+
+
+export const isEmptyObject = (val: ObjectType): boolean => {
+    // return !(Object.keys(val).length > 0 && Object.values(val).length > 0);
+    return typeof val === "object"? !(Object.keys(val).length > 0 && Object.values(val).length > 0) : false;
+}
 
 export const isNull = (infoItem: any): boolean => {
     "use strict";

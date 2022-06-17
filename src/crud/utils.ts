@@ -1,11 +1,7 @@
-import { ActionParamsType, ActionParamType, CrudParamsType, TaskTypes, } from "..";
+import { ActionParamsType, ActionParamType, CrudParamsType, TaskTypes, isEmptyObject } from "..";
 import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
 // import sanitize from "sanitize-html";
 // import { gunzipSync, gzipSync } from "zlib";
-
-export function isEmptyObject(val: object): boolean {
-    return !(Object.keys(val).length > 0 && Object.values(val).length > 0);
-}
 
 export function checkTaskType(params: CrudParamsType): string {
     let taskType = TaskTypes.UNKNOWN
@@ -25,7 +21,7 @@ export function checkTaskType(params: CrudParamsType): string {
 }
 
 export function validateActionParams(actParams: ActionParamsType = []): ResponseMessage {
-    // validate req-params: actionParams must be array or 1 or more item(s)
+    // validate req-params: actionParams must be an array or 1 or more item(s)
     if (actParams.length < 1) {
         return getResMessage('validateError', {
             message: "actionParams(record-inputs) must be an array of object values [ActionParamsType].",
