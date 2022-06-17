@@ -5,9 +5,9 @@
  * @Description: CRUD types
  */
 
-import {AuditLog}        from "../auditlog";
+import {AuditLog} from "../auditlog";
 import {ResponseMessage} from "@mconnect/mcresponse";
-import {Pool}            from "pg";
+import {Pool} from "pg";
 
 export interface ObjectRefType {
     [key: string]: any;
@@ -389,6 +389,8 @@ export interface CrudOptionsType {
     fieldSeparator?: string;
     queryFieldType?: CrudQueryFieldType;
     getAllRecords?: boolean;
+    getFromCache?: boolean;
+    cacheGetResult?: boolean;
 }
 
 export interface CreateQueryObject {

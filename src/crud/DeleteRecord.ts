@@ -50,10 +50,10 @@ class DeleteRecord extends Crud {
                     }
                 }
                 // check if records exist, for delete and audit-log
-                if (this.logUpdate) {
-                    const recExist = await this.getCurrentRecords("id");
-                    if (recExist.code !== "success") {
-                        return recExist;
+                if (this.logDelete) {
+                    const recExistRes = await this.getCurrentRecords("id");
+                    if (recExistRes.code !== "success") {
+                        return recExistRes;
                     }
                 }
                 // delete/remove records
@@ -82,10 +82,10 @@ class DeleteRecord extends Crud {
                         return accessRes
                     }
                 }
-                if (this.logUpdate) {
-                    const recExist = await this.getCurrentRecords("queryParams");
-                    if (recExist.code !== "success") {
-                        return recExist;
+                if (this.logDelete) {
+                    const recExistRes = await this.getCurrentRecords("queryParams");
+                    if (recExistRes.code !== "success") {
+                        return recExistRes;
                     }
                 }
                 // delete/remove records

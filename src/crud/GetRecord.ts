@@ -5,11 +5,11 @@
  */
 
 // Import required module(s)
-import { getHashCache, setHashCache } from "@mconnect/mccache";
-import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
-import { Crud } from "./Crud";
-import { CheckAccessType, CrudOptionsType, CrudParamsType, GetResultType, LogRecordsType, TaskTypes } from "./types";
-import { isEmptyObject } from "./utils";
+import {getHashCache, setHashCache} from "@mconnect/mccache";
+import {getResMessage, ResponseMessage} from "@mconnect/mcresponse";
+import {Crud} from "./Crud";
+import {CheckAccessType, CrudOptionsType, CrudParamsType, GetResultType, LogRecordsType, TaskTypes} from "./types";
+import {isEmptyObject} from "./utils";
 
 class GetRecord extends Crud {
     constructor(params: CrudParamsType, options: CrudOptionsType = {}) {
@@ -42,9 +42,6 @@ class GetRecord extends Crud {
             this.skip = 0;
         }
 
-        // check read permission
-        // let roleServices: RoleServiceResponseType;
-
         // check the audit-log settings - to perform audit-log (read/search info - params, keywords etc.)
         let logRes: ResponseMessage;
         if ((this.logRead || this.logCrud) && this.queryParams && !isEmptyObject(this.queryParams)) {
@@ -59,19 +56,20 @@ class GetRecord extends Crud {
         }
 
         // check cache for matching record(s), and return if exist
-        try {
-            const cacheRes = await getHashCache(this.cacheKey, this.table);
-            if (cacheRes && cacheRes.value) {
-                console.log("cache-items-before-query: ", cacheRes.value.records[0]);
-                return getResMessage("success", {
-                    value  : cacheRes.value,
-                    message: "from cache",
-                });
+        if (this.getFromCache) {
+            try {
+                const cacheRes = await getHashCache(this.cacheKey, this.table);
+                if (cacheRes && cacheRes.value) {
+                    console.log("cache-items-before-query: ", cacheRes.value.records[0]);
+                    return getResMessage("success", {
+                        value  : cacheRes.value,
+                        message: "from cache",
+                    });
+                }
+            } catch (e) {
+                console.error("error from the cache: ", e.stack);
             }
-        } catch (e) {
-            console.error("error from the cache: ", e.stack);
         }
-
         // Get the item(s) by recordId(s), queryParams or all items
         if (this.recordIds && this.recordIds.length > 0) {
             try {
@@ -90,14 +88,16 @@ class GetRecord extends Crud {
                         stats  : res.value.stats,
                         logRes,
                     }
-                    setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
+                    if (this.cacheGetResult) {
+                        setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
+                    }
                     return getResMessage("success", {
                         value: resultValue,
                     });
                 }
-                return getResMessage("notFound", {
+                return getResMessage(res.code, {
                     message: res.message,
-                    value  : res,
+                    value  : res.value,
                 });
             } catch (error) {
                 return getResMessage("notFound", {
@@ -123,7 +123,9 @@ class GetRecord extends Crud {
                         stats  : res.value.stats,
                         logRes,
                     }
-                    setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
+                    if (this.cacheGetResult) {
+                        setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
+                    }
                     return getResMessage("success", {
                         value: resultValue,
                     });
@@ -141,63 +143,72 @@ class GetRecord extends Crud {
         // check login-status
         if (this.checkAccess) {
             const accessRes = await this.checkLoginStatus()
-            const userRec: CheckAccessType = accessRes.value;
-            // get all records, up to the permissible limit - admin-user only
-            if (userRec.isAdmin && userRec.isActive) {
-                try {
-                    const res = await this.getCurrentRecords()
-                    if (res.code === "success") {
-                        // save copy in the cache
-                        const resultValue: GetResultType = {
-                            records: res.value.records,
-                            stats  : res.value.stats,
-                            logRes,
+            if (accessRes.code === "success") {
+                const userRec: CheckAccessType = accessRes.value;
+                // get all records, up to the permissible limit - admin-user only
+                if (userRec.isAdmin && userRec.isActive) {
+                    try {
+                        const res = await this.getCurrentRecords()
+                        if (res.code === "success") {
+                            // save copy in the cache
+                            const resultValue: GetResultType = {
+                                records: res.value.records,
+                                stats  : res.value.stats,
+                                logRes,
+                            }
+                            // cache records not implemented, for consistency & performance reasons
+                            // if (this.cacheGetResult) {
+                            // setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
+                            // }
+                            return getResMessage("success", {
+                                value: resultValue,
+                            });
                         }
-                        setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
-                        return getResMessage("success", {
-                            value: resultValue,
+                        return getResMessage("notFound", {
+                            message: res.message,
+                            value  : res,
+                        });
+                    } catch (error) {
+                        return getResMessage("notFound", {
+                            value: error,
                         });
                     }
-                    return getResMessage("notFound", {
-                        message: res.message,
-                        value  : res,
-                    });
-                } catch (error) {
-                    return getResMessage("notFound", {
-                        value: error,
-                    });
                 }
-            }
-            // get records by ownership, createdBy
-            if (userRec.userId && userRec.isActive) {
-                try {
-                    this.queryParams = {
-                        "createdBy": userRec.userId,
-                    }
-                    const res = await this.getCurrentRecords("queryParams")
-                    if (res.code === "success") {
-                        // save copy in the cache
-                        const resultValue: GetResultType = {
-                            records: res.value.records,
-                            stats  : res.value.stats,
-                            logRes,
+                // get records by ownership, createdBy
+                if (userRec.userId && userRec.isActive) {
+                    try {
+                        this.queryParams = {
+                            "createdBy": userRec.userId,
                         }
-                        setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
-                        return getResMessage("success", {
-                            value: resultValue,
+                        const res = await this.getCurrentRecords("queryParams")
+                        if (res.code === "success") {
+                            // save copy in the cache
+                            const resultValue: GetResultType = {
+                                records: res.value.records,
+                                stats  : res.value.stats,
+                                logRes,
+                            }
+                            // cache records not implemented, for consistency & performance reasons
+                            // if (this.cacheGetResult) {
+                                // setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
+                            // }
+                            return getResMessage("success", {
+                                value: resultValue,
+                            });
+                        }
+                        return getResMessage("notFound", {
+                            message: res.message,
+                            value  : res,
+                        });
+                    } catch (error) {
+                        return getResMessage("notFound", {
+                            value: error,
                         });
                     }
-                    return getResMessage("notFound", {
-                        message: res.message,
-                        value  : res,
-                    });
-                } catch (error) {
-                    return getResMessage("notFound", {
-                        value: error,
-                    });
                 }
             }
         }
+        // get all-records (mostly for lookup tables/records)
         if (this.getAllRecords) {
             try {
                 const res = await this.getCurrentRecords()
@@ -208,7 +219,10 @@ class GetRecord extends Crud {
                         stats  : res.value.stats,
                         logRes,
                     }
+                    // cache all-table records not implemented, for performance reasons
+                    // if (this.cacheGetResult) {
                     // setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
+                    // }
                     return getResMessage("success", {
                         value: resultValue,
                     });
@@ -234,4 +248,4 @@ function newGetRecord(params: CrudParamsType, options: CrudOptionsType = {}) {
     return new GetRecord(params, options);
 }
 
-export { GetRecord, newGetRecord };
+export {GetRecord, newGetRecord};

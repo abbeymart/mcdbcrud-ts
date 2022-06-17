@@ -86,6 +86,8 @@ export class Crud {
     protected cacheExpire: number;
     protected fieldSeparator: string;
     protected queryFieldType: CrudQueryFieldType;
+    protected getFromCache: boolean;
+    protected cacheGetResult: boolean;
 
     constructor(params: CrudParamsType, options?: CrudOptionsType) {
         // crudParams
@@ -145,6 +147,8 @@ export class Crud {
             limit        : this.limit,
         });
         this.getAllRecords = options?.getAllRecords || false;
+        this.getFromCache = options?.getFromCache || false;
+        this.cacheGetResult = options?.cacheGetResult || false;
         // auditLog constructor / instance
         this.transLog = newAuditLog(this.auditDb, this.auditTable);
         // standard defaults
@@ -249,7 +253,7 @@ export class Crud {
     }
 
     // computeQueryRecords method computes, from db-result, the records of ActionParamsType (Array<object>)
-    computeQueryRecords(recRes: QueryResult<any>): ActionParamsType {
+    computeQueryRecords(recRes: QueryResult): ActionParamsType {
         // compute records
         let records: ActionParamsType = [];
         try {
