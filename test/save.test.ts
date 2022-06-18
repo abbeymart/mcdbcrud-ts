@@ -1,5 +1,5 @@
 import {assertEquals, mcTest, postTestResult} from '@mconnect/mctest';
-import {MyDb} from "./config";
+import {AuditDb, MyDb} from "./config";
 import {
     CrudParamsType, CrudResultType, newDbPg, newSaveRecord
 } from "../src";
@@ -12,7 +12,12 @@ import {
 let myDb = MyDb
 myDb.options = {}
 
+let aDb = AuditDb
+aDb.options = {}
+
 const dbc = newDbPg(myDb, myDb.options);
+const auditDbc = newDbPg(aDb, aDb.options)
+CrudParamOptions.auditDb = auditDbc.pgPool()
 
 const crudParams: CrudParamsType = {
     appDb      : dbc.pgPool(),

@@ -40,6 +40,10 @@ class AuditLog {
         this.auditTable = auditTable;
     }
 
+    getAuditTable(): string {
+        return this.auditTable
+    }
+
     async createLog(tableName: string, logRecords: any, userId: string): Promise<ResponseMessage> {
         const dbCheck = checkDb(this.dbHandle);
         if (dbCheck.code !== "success") {
