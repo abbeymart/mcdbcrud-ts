@@ -29,7 +29,7 @@ export const AuditModel = {
 } as AuditType
 
 export const AuditTable = "audits"
-export const GetTable = "audits_get"
+export const GetTable = "audits"
 export const DeleteTable = "audits_delete"
 export const DeleteAllTable = "audits_delete_all"
 export const UpdateTable = "audits_update"
@@ -49,23 +49,25 @@ export const TestUserInfo = {
 } as UserInfoType
 
 export const CrudParamOptions = {
-    checkAccess  : false,
-    auditTable   : "audits",
-    userTable    : "users",
-    profileTable : "profiles",
-    serviceTable : "services",
-    accessTable  : "accesses",
-    verifyTable  : "verify_users",
-    roleTable    : "roles",
-    logCrud      : false,
-    logCreate    : false,
-    logUpdate    : false,
-    logDelete    : false,
-    logRead      : false,
-    logLogin     : false,
-    logLogout    : false,
-    maxQueryLimit: 100000,
-    msgFrom      : "support@mconnect.biz",
+    checkAccess   : false,
+    auditTable    : "audits",
+    userTable     : "users",
+    profileTable  : "profiles",
+    serviceTable  : "services",
+    accessTable   : "accesses",
+    verifyTable   : "verify_users",
+    roleTable     : "roles",
+    logCrud       : true,
+    logCreate     : true,
+    logUpdate     : true,
+    logDelete     : true,
+    logRead       : true,
+    logLogin      : false,
+    logLogout     : false,
+    maxQueryLimit : 10000,
+    msgFrom       : "support@mconnect.biz",
+    cacheGetResult: false,
+    getFromCache  : false,
 } as CrudOptionsType
 
 // TODO: create/update, get & delete records for groups & categories tables
@@ -153,7 +155,7 @@ export const AuditUpdateActionParams = [
 // TODO: update and delete params, by ids / queryParams
 
 export const AuditUpdateRecordById = {
-    "id"           : "b126f4c0-9bad-4242-bec1-4c4ab74ae481",
+    "id"           : "a345c33f-d9bf-47a4-aab5-3979528a0972",
     "tableName"    : "groups",
     "logAt"        : new Date(),
     "logBy"        : UserId,
@@ -163,7 +165,7 @@ export const AuditUpdateRecordById = {
 } as ActionParamType
 
 export const AuditUpdateRecordByParam = {
-    "id"           : "f380f132-422f-4cd4-82c1-07b4caf35da0",
+    "id"           : "d9cb7344-2c37-4492-9bf1-d6fa5ccc9634",
     "tableName"    : "contacts",
     "logAt"        : new Date(),
     "logBy"        : UserId,
@@ -174,9 +176,9 @@ export const AuditUpdateRecordByParam = {
 
 // GetIds: for get-records by ids & params | TODO: update ids after create
 
-export const GetAuditById = "7461ae6c-96e0-4b4f-974b-9a0a7f91e016"
-export const GetAuditByIds = ["7461ae6c-96e0-4b4f-974b-9a0a7f91e016",
-    "aa9ba999-b138-414b-be66-9f0264e50f4a"] as Array<string>
+export const GetAuditById = "40afeaf8-abbb-43be-9c44-1642f393f0e9"
+export const GetAuditByIds = ["40afeaf8-abbb-43be-9c44-1642f393f0e9",
+    "5cd69f14-1945-400a-91fd-8ea6ca51cd64"] as Array<string>
 export const GetAuditByParams = {
     "logType": "create",
 } as QueryParamType
@@ -186,23 +188,23 @@ export const GetAuditByParams = {
 // 05a85b66-d68a-4f46-834d-b1c4f9c58a6c
 // 03a24b50-9cf2-40b4-9375-1ad6b9831310
 // 19209e24-d8cc-45a1-a7e9-4d7646b886f6
-export const DeleteAuditById = "91b3c435-fce7-4d28-9e05-cc9feafb5b48"
+export const DeleteAuditById = "d9cb7344-2c37-4492-9bf1-d6fa5ccc9634"
 export const DeleteAuditByIds = [
-    "708713f2-ea16-404a-959c-2cb5762c394a",
-    "05a85b66-d68a-4f46-834d-b1c4f9c58a6c",
-    "03a24b50-9cf2-40b4-9375-1ad6b9831310",
-    "19209e24-d8cc-45a1-a7e9-4d7646b886f6",
+    "40afeaf8-abbb-43be-9c44-1642f393f0e9",
+    "3e56eb70-9fa1-4881-b8b4-11a114cb5673",
+    "2cb32875-2268-4636-a2da-298611a19fd3",
+    "7bedcf6d-d229-4553-9ff0-19011e7ac0ff",
 ] as Array<string>
 
 export const DeleteAuditByParams = {
     "logType": "read",
 } as QueryParamType
 
-export const UpdateAuditById = "98bb024e-2b22-42b4-b379-7099166ad1c9"
+export const UpdateAuditById = "d9cb7344-2c37-4492-9bf1-d6fa5ccc9634"
 export const UpdateAuditByIds = [
-    "c158c19f-e396-4625-96ee-d054ef4f40a1",
-    "e34b10f9-6320-4573-96cc-2cd8c69c9a89",
-    "9b9acf43-9008-4261-9528-39f47f261adf",
+    "d9cb7344-2c37-4492-9bf1-d6fa5ccc9634",
+    "40afeaf8-abbb-43be-9c44-1642f393f0e9",
+    "8d090d92-a916-4683-8619-4aa1484c6544",
 ] as Array<string>
 
 export const UpdateAuditByParams = {
