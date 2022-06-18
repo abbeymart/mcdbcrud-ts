@@ -14,4 +14,5 @@ export * from "./GetRecord";
 export * from "./GetRecordStream";
 export * from "./DeleteRecord";
 export * from "./LoadRecord";
-export * from "./utils"
+export * from "./utils";
+export * from "./helpers";

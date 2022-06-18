@@ -1,5 +1,10 @@
 # Historical logs
 
+## Version 0.4.0
+
+- Release date: June 18, 2022
+- Exported-script-computation-methods-v0.4.0
+
 ## Version 0.3.0
 
 - Release date: June 18, 2022
