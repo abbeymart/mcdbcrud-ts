@@ -1,7 +1,7 @@
 import { ActionParamsType, ActionParamType, CrudParamsType, TaskTypes, isEmptyObject } from "..";
 import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
-// import sanitize from "sanitize-html";
-// import { gunzipSync, gzipSync } from "zlib";
+import sanitize from "sanitize-html";
+import { gunzipSync, gzipSync } from "zlib";
 
 export function checkTaskType(params: CrudParamsType): string {
     let taskType = TaskTypes.UNKNOWN
@@ -51,17 +51,17 @@ export const toCamelCase = (text: string, sep = '_') => {
     return `${firstWord}${otherWords.join('')}`;
 }
 
-// export const setContentBody = (fieldValue: string): string => {
-//     const sanitizeValue = sanitize(fieldValue);
-//     const gzippedBuffer = gzipSync(sanitizeValue);
-//     return gzippedBuffer.toString('base64');
-// }
+export const setContentBody = (fieldValue: string): string => {
+    const sanitizeValue = sanitize(fieldValue);
+    const gzippedBuffer = gzipSync(sanitizeValue);
+    return gzippedBuffer.toString('base64');
+}
 
-// export const getContentBody = (body: string) => {
-//     const gzippedBuffer = Buffer.from(body, 'base64');
-//     const unzippedBuffer = gunzipSync(gzippedBuffer);
-//     return unzippedBuffer.toString();
-// }
+export const getContentBody = (body: string) => {
+    const gzippedBuffer = Buffer.from(body, 'base64');
+    const unzippedBuffer = gunzipSync(gzippedBuffer);
+    return unzippedBuffer.toString();
+}
 
 export const excludeEmptyIdFields = (recs: Array<ActionParamType>): Array<ActionParamType> => {
     let actParams: Array<ActionParamType> = []

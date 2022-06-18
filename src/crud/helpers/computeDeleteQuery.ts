@@ -1,6 +1,6 @@
 import {DeleteQueryResult, QueryParamType} from "../types";
 import {computeWhereQuery}                 from "./computeWhereQuery";
-import {isEmptyObject}                     from "../utils";
+import {isEmptyObject}                     from "../validate";
 
 const errMessage = (message: string) => {
     return {

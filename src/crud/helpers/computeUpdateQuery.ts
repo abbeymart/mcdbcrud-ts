@@ -1,8 +1,9 @@
 import {
     ActionParamsType, ActionParamType, MultiUpdateQueryResult, QueryParamType, UpdateQueryObject, UpdateQueryResult
-}                                         from "../types";
-import {computeWhereQuery}                from "./computeWhereQuery";
-import {camelToUnderscore, isEmptyObject} from "../utils";
+} from "../types";
+import {computeWhereQuery} from "./computeWhereQuery";
+import {camelToUnderscore} from "../utils";
+import {isEmptyObject} from "../validate";
 
 const errMessage = (message: string) => {
     return {

@@ -1,5 +1,6 @@
 import {QueryParamType, WhereQueryResult} from "../types";
-import {camelToUnderscore, isEmptyObject} from "../utils";
+import {camelToUnderscore} from "../utils";
+import {isEmptyObject} from "../validate";
 
 const errMessage = (message: string) => {
     return {

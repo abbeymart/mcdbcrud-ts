@@ -1,6 +1,7 @@
 import {ActionParamType, CrudOptionsType, QueryParamType, SelectQueryResult} from "../types";
-import {camelToUnderscore, isEmptyObject}                                    from "../utils";
-import {computeWhereQuery}                                                   from "./computeWhereQuery";
+import {camelToUnderscore} from "../utils";
+import {computeWhereQuery} from "./computeWhereQuery";
+import {isEmptyObject} from "../validate";
 
 const errMessage = (message: string) => {
     return {

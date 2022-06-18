@@ -6,19 +6,19 @@
  */
 
 // Import required module/function(s)
-import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
-import { deleteHashCache } from "@mconnect/mccache";
-import { Crud } from "./Crud";
+import {getResMessage, ResponseMessage} from "@mconnect/mcresponse";
+import {deleteHashCache} from "@mconnect/mccache";
+import {Crud} from "./Crud";
 import {
     ActionParamsType,
     ActionParamTaskType,
     CrudOptionsType,
-    CrudParamsType, LogRecordsType,
+    CrudParamsType, excludeEmptyIdFields, LogRecordsType,
     ModelOptionsType,
     TaskTypes
 } from "..";
-import { isEmptyObject } from "./validate";
-import { computeCreateQuery } from "./helpers/computeCreateQuery";
+import {isEmptyObject} from "./validate";
+import {computeCreateQuery} from "./helpers/computeCreateQuery";
 import {
     computeUpdateQuery,
     computeUpdateQueryById,
@@ -54,8 +54,12 @@ class SaveRecord extends Crud {
             return accessDbCheck;
         }
 
+        // clean actionParams of empty-id-values
+        this.actionParams = excludeEmptyIdFields(this.actionParams)
+
         // determine update / create (new) items from actionParams
         const {recordIds} = await this.computeItems();
+
         // validate createItems and updateItems
         if (this.createItems.length > 0 && this.updateItems.length > 0) {
             return getResMessage("paramsError", {
@@ -63,18 +67,15 @@ class SaveRecord extends Crud {
                 value  : {},
             });
         }
-        // task-type:
-        if (this.createItems.length > 0) {
-            this.taskType = TaskTypes.CREATE
-        } else if (this.updateItems.length > 0) {
-            this.taskType = TaskTypes.UPDATE
-        } else {
+        // check task-type:
+        const taskType = this.checkTaskType()
+        if (taskType === TaskTypes.UNKNOWN) {
             return getResMessage("paramsError", {
-                message: "Inputs errors (actionParams required) to complete create or update tasks.",
+                message: `Task-type[${TaskTypes.UNKNOWN}]: valid actionParams required to complete create or update tasks.`,
                 value  : {},
             });
         }
-        // create records/documents
+        // create records/document(s)
         if (this.taskType === TaskTypes.CREATE && this.createItems.length > 0) {
             try {
                 // check task-permission
@@ -94,7 +95,7 @@ class SaveRecord extends Crud {
             }
         }
 
-        // update existing records/documents
+        // update existing records/document(s), by recordIds
         if (this.taskType === TaskTypes.UPDATE && this.updateItems.length === 1 && this.recordIds.length > 0) {
             try {
                 // check task-permission
@@ -104,7 +105,7 @@ class SaveRecord extends Crud {
                         return accessRes
                     }
                 }
-                if (this.logUpdate) {
+                if (this.logUpdate || this.logCrud) {
                     const currentRec = await this.getCurrentRecords("id");
                     if (currentRec.code !== "success") {
                         return currentRec;
@@ -120,8 +121,8 @@ class SaveRecord extends Crud {
             }
         }
 
-        // update records/documents by queryParams: permitted for admin user only
-        if (this.taskType === TaskTypes.UPDATE && !isEmptyObject(this.queryParams) && this.updateItems.length === 1) {
+        // update records/document(s) by queryParams: permitted for admin user only
+        if (this.taskType === TaskTypes.UPDATE && this.updateItems.length === 1 && !isEmptyObject(this.queryParams) ) {
             try {
                 // check task-permission
                 if (this.checkAccess) {
@@ -131,7 +132,7 @@ class SaveRecord extends Crud {
                     }
                 }
                 // get current records update and audit log
-                if (this.logUpdate) {
+                if (this.logUpdate || this.logCrud) {
                     const currentRec = await this.getCurrentRecords("queryparams");
                     if (currentRec.code !== "success") {
                         return currentRec;
@@ -147,6 +148,7 @@ class SaveRecord extends Crud {
             }
         }
 
+        // update records/document(s), batch/multiple updates
         if (this.taskType === TaskTypes.UPDATE && this.updateItems.length > 0) {
             // check task-permission
             this.recordIds = recordIds
@@ -166,6 +168,27 @@ class SaveRecord extends Crud {
     }
 
     // helper methods:
+    checkTaskType(): string {
+        let taskType = TaskTypes.UNKNOWN
+        if (this.createItems.length > 0) {
+            taskType = TaskTypes.CREATE
+        } else if (this.updateItems.length > 0) {
+            taskType = TaskTypes.UPDATE
+        } else if (this.actionParams.length > 0) {
+            const actParam = this.actionParams[0]
+            if (!actParam["id"] || actParam["id"] === "") {
+                if (this.actionParams.length === 1 && (this.recordIds?.length > 0) || !isEmptyObject(this.queryParams)) {
+                    taskType = TaskTypes.UPDATE
+                } else {
+                    taskType = TaskTypes.CREATE
+                }
+            } else {
+                taskType = TaskTypes.UPDATE
+            }
+        }
+        return taskType
+    }
+
     async computeItems(modelOptions: ModelOptionsType = this.modelOptions): Promise<ActionParamTaskType> {
         let updateItems: ActionParamsType = [],
             recordIds: Array<string> = [],
@@ -174,7 +197,7 @@ class SaveRecord extends Crud {
         if (this.actionParams.length === 1) {
             let item = this.actionParams[0]
             if (this.recordIds.length > 0 || !isEmptyObject(this.queryParams)) {
-                // update/existing document
+                // update existing document/record(s), by recordIds or queryParams
                 if (modelOptions.actorStamp) {
                     item["updatedBy"] = this.userId;
                 }
@@ -186,9 +209,9 @@ class SaveRecord extends Crud {
                 }
                 updateItems.push(item);
             } else if (item["id"]) {
+                // update existing document/record, by recordId
                 this.recordIds = [];
                 this.queryParams = {};
-                // update/existing document
                 if (modelOptions.actorStamp) {
                     item["updatedBy"] = this.userId;
                 }
@@ -201,12 +224,12 @@ class SaveRecord extends Crud {
                 updateItems.push(item);
                 recordIds.push(item["id"]);
             } else {
+                // create new document/record
                 this.recordIds = [];
                 this.queryParams = {};
                 // exclude any traces of id, especially without concrete value ("", null, undefined), if present
                 const {id, ...saveParams} = item;
                 item = saveParams;
-                // create/new document
                 if (modelOptions.actorStamp) {
                     item["createdBy"] = this.userId;
                 }
@@ -222,11 +245,12 @@ class SaveRecord extends Crud {
             this.updateItems = updateItems;
             // this.recordIds = recordIds;
         } else if (this.actionParams.length > 1) {
+            // multiple/batch creation or update of document/records
             this.recordIds = [];
             this.queryParams = {};
             this.actionParams.forEach((item) => {
                 if (item["id"]) {
-                    // update/existing document
+                    // update existing document/record
                     if (modelOptions.actorStamp) {
                         item["updatedBy"] = this.userId;
                     }
@@ -239,10 +263,10 @@ class SaveRecord extends Crud {
                     updateItems.push(item);
                     recordIds.push(item["id"]);
                 } else {
+                    // create new document/record
                     // exclude any traces of id, especially without concrete value ("", null, undefined), if present
                     const {id, ...saveParams} = item;
                     item = saveParams;
-                    // create/new document
                     if (modelOptions.actorStamp) {
                         item["createdBy"] = this.userId;
                     }
@@ -461,7 +485,7 @@ class SaveRecord extends Crud {
                 // delete cache
                 await deleteHashCache(this.cacheKey, this.table, "key");
                 // check the audit-log settings - to perform audit-log
-                let logRes = {};
+                let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
                 if (this.logUpdate || this.logCrud) {
                     // include query-params for audit-log
                     const logRecs: LogRecordsType = {logRecords: this.currentRecs}
@@ -500,8 +524,12 @@ class SaveRecord extends Crud {
             // destruct id /other attributes
             const {id, ...otherParams} = this.updateItems[0];
             // include item stamps: userId and date
-            otherParams.updatedBy = this.userId;
-            otherParams.updatedAt = new Date();
+            if (this.modelOptions.actorStamp) {
+                otherParams.updatedBy = this.userId;
+            }
+            if (this.modelOptions.timeStamp) {
+                otherParams.updatedAt = new Date();
+            }
             const {
                 updateQueryObject,
                 ok,
@@ -525,8 +553,8 @@ class SaveRecord extends Crud {
                 // delete cache
                 await deleteHashCache(this.cacheKey, this.table, "key");
                 // check the audit-log settings - to perform audit-log
-                let logRes = {};
-                if (this.logUpdate) {
+                let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
+                if (this.logUpdate || this.logCrud) {
                     // include query-params for audit-log
                     const logRecs: LogRecordsType = {logRecords: this.currentRecs}
                     const newLogRecs: LogRecordsType = {logRecords: this.updateItems}
@@ -535,7 +563,7 @@ class SaveRecord extends Crud {
                 }
                 await client.query("COMMIT")
                 return getResMessage("success", {
-                    message: "Requested action(s) performed successfully.",
+                    message: "Record(s) updated successfully.",
                     value  : {
                         recordsCount: recordsCount,
                         logRes,
@@ -561,4 +589,4 @@ function newSaveRecord(params: CrudParamsType, options: CrudOptionsType = {}) {
     return new SaveRecord(params, options);
 }
 
-export { SaveRecord, newSaveRecord };
+export {SaveRecord, newSaveRecord};
