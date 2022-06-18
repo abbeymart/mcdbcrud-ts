@@ -9,7 +9,7 @@ import {getHashCache, setHashCache} from "@mconnect/mccache";
 import {getResMessage, ResponseMessage} from "@mconnect/mcresponse";
 import {Crud} from "./Crud";
 import {CheckAccessType, CrudOptionsType, CrudParamsType, GetResultType, LogRecordsType, TaskTypes} from "./types";
-import {isEmptyObject} from "./utils";
+import {isEmptyObject} from "./validate";
 
 class GetRecord extends Crud {
     constructor(params: CrudParamsType, options: CrudOptionsType = {}) {

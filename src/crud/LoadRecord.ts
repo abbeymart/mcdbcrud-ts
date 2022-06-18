@@ -10,7 +10,7 @@ import { validateLoadParams } from "./ValidateCrudParam";
 import { checkDb } from "../dbc";
 import { ActionParamsType, CrudOptionsType, CrudParamsType, UserInfoType } from "./types";
 import { Pool } from "pg";
-import { isEmptyObject } from "./utils";
+import { isEmptyObject } from "./validate";
 
 class LoadRecord {
     protected params: CrudParamsType;

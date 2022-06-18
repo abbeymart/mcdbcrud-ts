@@ -67,9 +67,16 @@ class SaveRecord extends Crud {
                 value  : {},
             });
         }
+        if (this.createItems.length < 1 && this.updateItems.length < 1) {
+            return getResMessage("paramsError", {
+                message: "Valid action-params required for create or update task.",
+                value  : {},
+            });
+        }
+
         // check task-type:
-        const taskType = this.checkTaskType()
-        if (taskType === TaskTypes.UNKNOWN) {
+        this.taskType = this.checkTaskType()
+        if (this.taskType === TaskTypes.UNKNOWN) {
             return getResMessage("paramsError", {
                 message: `Task-type[${TaskTypes.UNKNOWN}]: valid actionParams required to complete create or update tasks.`,
                 value  : {},
@@ -88,7 +95,7 @@ class SaveRecord extends Crud {
                 // create records
                 return await this.createRecord();
             } catch (e) {
-                console.error(e);
+                // console.error(e);
                 return getResMessage("insertError", {
                     message: "Error-inserting/creating new record.",
                 });
@@ -114,7 +121,7 @@ class SaveRecord extends Crud {
                 // update records
                 return await this.updateRecordById();
             } catch (e) {
-                console.error(e);
+                // console.error(e);
                 return getResMessage("updateError", {
                     message: `Error updating record(s): ${e.message ? e.message : ""}`,
                 });
@@ -141,7 +148,7 @@ class SaveRecord extends Crud {
                 // update records
                 return await this.updateRecordByParams();
             } catch (e) {
-                console.error(e);
+                // console.error(e);
                 return getResMessage("updateError", {
                     message: `Error updating record(s): ${e.message ? e.message : ""}`,
                 });
@@ -343,7 +350,6 @@ class SaveRecord extends Crud {
                 throw new Error("Unable to create new record(s), database error.")
             }
         } catch (e) {
-            // console.log("crud-error: ", e)
             await client.query("ROLLBACK")
             return getResMessage("insertError", {
                 message: `Error inserting/creating new record(s): ${e.message ? e.message : ""}`,

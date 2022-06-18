@@ -26,7 +26,7 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
     await mcTest({
         name    : 'should connect to the DB and return an instance object',
         testFunc: () => {
-            assertEquals(mcLog.getAuditTable, mcLogResult.auditTable, `audit-table should be: ${mcLogResult.auditTable}`);
+            assertEquals(mcLog.getAuditTable(), mcLogResult.auditTable, `audit-table should be: ${mcLogResult.auditTable}`);
         }
     });
 

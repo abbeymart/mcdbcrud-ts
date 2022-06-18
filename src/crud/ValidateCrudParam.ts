@@ -5,7 +5,7 @@
  * @Description: crud-validation helper functions
  */
 
-import {isEmptyObject} from "./utils";
+// import {isEmptyObject} from "./validate";
 import * as utils from "./validate";
 import { CrudParamsType, MessageObject } from "./types";
 import { mcMessages } from "../messages";
@@ -119,7 +119,7 @@ export function validateDeleteParams(crudParams: CrudParamsType) {
             }
         }
 
-        if ((!crudParams.recordIds || crudParams.recordIds.length < 1) && (!crudParams.queryParams || isEmptyObject(crudParams.queryParams))) {
+        if ((!crudParams.recordIds || crudParams.recordIds.length < 1) && (!crudParams.queryParams || utils.isEmptyObject(crudParams.queryParams))) {
             errors.recordIds = errors.recordIds ? errors.recordIds + " | docId or queryParams is required" : "docId or queryParams is required";
             errors.queryParams = errors.queryParams ? errors.queryParams + " | docId or queryParams is required" : "docId or queryParams is required";
         }

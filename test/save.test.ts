@@ -40,6 +40,7 @@ const crudParams: CrudParamsType = {
             const recLen = crudParams.actionParams.length
             const crud = newSaveRecord(crudParams, CrudParamOptions);
             const res = await crud.saveRecord()
+            // console.log("create-result: ", res, res.code, res.value.recordIds, res.value.recordCount)
             const resValue = res.value as CrudResultType
             const idLen = resValue.recordIds?.length || 0
             const recCount = resValue.recordsCount || 0
