@@ -10,7 +10,6 @@ import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
 import { checkDb } from "../dbc";
 import { Pool } from "pg";
 import { isEmptyObject, LogRecordsType, ObjectRefType } from "../crud";
-import { log } from "util";
 
 //types
 export interface AuditLogOptionsType {
@@ -53,11 +52,11 @@ class AuditLog {
         }
         // Check/validate the attributes / parameters
         let errorMessage = "";
-        if (!userId) {
+        if (!userId || userId === "") {
             errorMessage = errorMessage ? errorMessage + " | userId is required." :
                 "userId is required.";
         }
-        if (!logParams.tableName) {
+        if (!logParams.tableName || logParams.tableName === "") {
             errorMessage = errorMessage ? errorMessage + " | Table or Collection name is required." :
                 "Table or Collection name is required.";
         }
@@ -65,7 +64,7 @@ class AuditLog {
             errorMessage = errorMessage ? errorMessage + " | Created record(s) information is required." :
                 "Created record(s) information is required.";
         }
-        if (errorMessage) {
+        if (errorMessage || errorMessage !== "") {
             console.log("error-message: ", errorMessage);
             return getResMessage("paramsError", {
                 message: errorMessage,
@@ -107,11 +106,11 @@ class AuditLog {
         }
         // Check/validate the attributes / parameters
         let errorMessage = "";
-        if (!userId) {
+        if (!userId || userId === "") {
             errorMessage = errorMessage ? errorMessage + " | userId is required." :
                 "userId is required.";
         }
-        if (!logParams.tableName) {
+        if (!logParams.tableName || logParams.tableName === "") {
             errorMessage = errorMessage ? errorMessage + " | Table or Collection name is required." :
                 "Table or Collection name is required.";
         }
@@ -123,7 +122,7 @@ class AuditLog {
             errorMessage = errorMessage ? errorMessage + " | Updated record(s) information is required." :
                 "Updated record(s) information is required.";
         }
-        if (errorMessage) {
+        if (errorMessage || errorMessage !== "") {
             return getResMessage("paramsError", {
                 message: errorMessage,
             });
@@ -165,7 +164,7 @@ class AuditLog {
         }
         // validate params/values
         let errorMessage = "";
-        if (!logParams.tableName) {
+        if (!logParams.tableName || logParams.tableName === "") {
             errorMessage = errorMessage ? errorMessage + " | Table or Collection name is required." :
                 "Table or Collection name is required.";
         }
@@ -174,7 +173,7 @@ class AuditLog {
                 errorMessage + " | Search keywords or Read record(s) information is required." :
                 "Search keywords or Read record(s) information is required.";
         }
-        if (errorMessage) {
+        if (errorMessage || errorMessage !== "") {
             return getResMessage("paramsError", {
                 message: errorMessage,
             });
@@ -184,7 +183,7 @@ class AuditLog {
             // insert audit record
             let queryText: string
             let values: Array<any>
-            if (userId) {
+            if (userId || userId !== "") {
                 queryText = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`
                 values = [logParams.tableName, logParams.logRecords, AuditLogTypes.READ, userId, new Date()]
             } else {
@@ -222,11 +221,11 @@ class AuditLog {
         }
         // Check/validate the attributes / parameters
         let errorMessage = "";
-        if (!userId) {
+        if (!userId || userId === "") {
             errorMessage = errorMessage ? errorMessage + " | userId is required." :
                 "userId is required.";
         }
-        if (!logParams.tableName) {
+        if (!logParams.tableName || logParams.tableName === "") {
             errorMessage = errorMessage ? errorMessage + " | Table or Collection name is required." :
                 "Table or Collection name is required.";
         }
@@ -234,7 +233,7 @@ class AuditLog {
             errorMessage = errorMessage ? errorMessage + " | Deleted record(s) information is required." :
                 "Deleted record(s) information is required.";
         }
-        if (errorMessage) {
+        if (errorMessage || errorMessage !== "") {
             return getResMessage("paramsError", {
                 message: errorMessage,
             });
@@ -279,7 +278,7 @@ class AuditLog {
         if (!logParams.logRecords || isEmptyObject(logParams.logRecords as ObjectRefType)) {
             errorMessage = errorMessage + " | Login information is required."
         }
-        if (errorMessage) {
+        if (errorMessage || errorMessage !== "") {
             return getResMessage("paramsError", {
                 message: errorMessage,
             });
@@ -289,7 +288,7 @@ class AuditLog {
             // insert audit record
             let queryText: string
             let values: Array<any>
-            if (userId) {
+            if (userId || userId !== "") {
                 queryText = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`
                 values = [logTableName, logParams.logRecords, AuditLogTypes.LOGIN, userId, new Date()]
             } else {
@@ -303,11 +302,7 @@ class AuditLog {
             const res = await this.dbHandle.query(query)
             if (res.rowCount > 0) {
                 return getResMessage("success", {
-                    value: {
-                        fields      : res.fields,
-                        records     : res.rows,
-                        recordsCount: res.rowCount,
-                    },
+                    value: res,
                 });
             } else {
                 return getResMessage("insertError", {
@@ -332,13 +327,13 @@ class AuditLog {
         // validate params/values
         let errorMessage = "";
         const logTableName = logParams.tableName || tableName;
-        if (!userId) {
+        if (!userId || userId === "") {
             errorMessage = errorMessage + " | userId is required."
         }
         if (!logParams.logRecords || isEmptyObject(logParams.logRecords as ObjectRefType)) {
             errorMessage = errorMessage + " | Logout information is required."
         }
-        if (errorMessage) {
+        if (errorMessage || errorMessage !== "") {
             return getResMessage("paramsError", {
                 message: errorMessage,
             });
@@ -378,34 +373,34 @@ class AuditLog {
             return dbCheck;
         }
         // Check/validate the attributes / parameters by logTypes (create, update, delete, read, login, logout...)
-        let tableName = "",
-            logRecords: LogRecordsType = {},
-            newLogRecords: LogRecordsType = {},
-            errorMessage = "",
+        let errorMessage = "",
             query: { text: string; values: Array<any> } = {text: "", values: []};
 
+        // set share variable-values
         logType = logType.toLowerCase();
+        let tableName = logParams && logParams.tableName ? logParams.tableName : "";
+        const logRecords = logParams && logParams.logRecords && !isEmptyObject(logParams.logRecords) ?
+            logParams.logRecords : {};
+        const newLogRecords = logParams && logParams.newLogRecords && !isEmptyObject(logParams.newLogRecords) ?
+            logParams.newLogRecords : {}; // object or array
 
         switch (logType) {
             case "create":
             case AuditLogTypes.CREATE:
-                tableName = logParams && logParams.tableName ? logParams.tableName : "";
-                logRecords = logParams && logParams.logRecords && !isEmptyObject(logParams.logRecords) ?
-                    logParams.logRecords : {};
                 // validate params/values
-                if (!tableName) {
+                if (!tableName || tableName === "") {
                     errorMessage = errorMessage ? errorMessage + " | Table or Collection name is required." :
                         "Table or Collection name is required.";
                 }
-                if (!userId) {
+                if (!userId || userId === "") {
                     errorMessage = errorMessage ? errorMessage + " | userId is required." :
                         "userId is required.";
                 }
-                if (!logRecords) {
+                if (!logRecords || isEmptyObject(logRecords as ObjectRefType)) {
                     errorMessage = errorMessage ? errorMessage + " | Created record(s) information is required." :
                         "Created record(s) information is required.";
                 }
-                if (errorMessage) {
+                if (errorMessage || errorMessage !== "") {
                     return getResMessage("paramsError", {
                         message: errorMessage,
                     });
@@ -418,30 +413,24 @@ class AuditLog {
                 break;
             case "update":
             case AuditLogTypes.UPDATE:
-                tableName = logParams && logParams.tableName ? logParams.tableName : "";
-                logRecords = logParams && logParams.logRecords && !isEmptyObject(logParams.logRecords) ?
-                    logParams.logRecords : {};
-                newLogRecords = logParams && logParams.newLogRecords && !isEmptyObject(logParams.newLogRecords) ?
-                    logParams.newLogRecords : {}; // object or array
-
                 // validate params/values
-                if (!tableName) {
+                if (!tableName || tableName === "") {
                     errorMessage = errorMessage ? errorMessage + " | Table or Collection name is required." :
                         "Table or Collection name is required.";
                 }
-                if (!userId) {
+                if (!userId || userId === "") {
                     errorMessage = errorMessage ? errorMessage + " | userId is required." :
                         "userId is required.";
                 }
-                if (!logRecords) {
+                if (!logRecords || isEmptyObject(logRecords as ObjectRefType)) {
                     errorMessage = errorMessage ? errorMessage + " | Current record(s) information is required." :
                         "Current record(s) information is required.";
                 }
-                if (!newLogRecords) {
+                if (!newLogRecords || isEmptyObject(newLogRecords as ObjectRefType)) {
                     errorMessage = errorMessage ? errorMessage + " | Updated record(s) information is required." :
                         "Updated record(s) information is required.";
                 }
-                if (errorMessage) {
+                if (errorMessage || errorMessage !== "") {
                     return getResMessage("paramsError", {
                         message: errorMessage,
                     });
@@ -455,50 +444,43 @@ class AuditLog {
             case "delete":
             case AuditLogTypes.DELETE:
             case AuditLogTypes.REMOVE:
-                tableName = logParams && logParams.tableName ? logParams.tableName : "";
-                logRecords = logParams && logParams.logRecords ? logParams.logRecords : {};
-
                 // Check/validate the attributes / parameters
-                if (!tableName) {
+                if (!tableName || tableName === "") {
                     errorMessage = errorMessage ? errorMessage + " | Table or Collection name is required." :
                         "Table or Collection name is required.";
                 }
-                if (!userId) {
+                if (!userId || userId === "") {
                     errorMessage = errorMessage ? errorMessage + " | userId is required." :
                         "userId is required.";
                 }
-                if (!logRecords) {
+                if (!logRecords || isEmptyObject(logRecords as ObjectRefType)) {
                     errorMessage = errorMessage ? errorMessage + " | Deleted record(s) information is required." :
                         "Deleted record(s) information is required.";
                 }
-                if (errorMessage) {
+                if (errorMessage || errorMessage !== "") {
                     return getResMessage("paramsError", {
                         message: errorMessage,
                     });
                 }
-
                 query = {
                     text  : `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`,
-                    values: [tableName, logRecords, AuditLogTypes.REMOVE, userId, new Date()],
+                    values: [tableName, logRecords, AuditLogTypes.DELETE, userId, new Date()],
                 }
                 break;
             case "read":
             case AuditLogTypes.GET:
             case AuditLogTypes.READ:
-                tableName = logParams && logParams.tableName ? logParams.tableName : "";
-                logRecords = logParams && logParams.logRecords ? logParams.logRecords : null;
-
                 // validate params/values
-                if (!tableName) {
+                if (!tableName || tableName === "") {
                     errorMessage = errorMessage ? errorMessage + " | Table or Collection name is required." :
                         "Table or Collection name is required.";
                 }
-                if (!logRecords) {
+                if (!logRecords || isEmptyObject(logRecords as ObjectRefType)) {
                     errorMessage = errorMessage ?
                         errorMessage + " | Search keywords or Read record(s) information is required." :
                         "Search keywords or Read record(s) information is required.";
                 }
-                if (errorMessage) {
+                if (errorMessage || errorMessage !== "") {
                     return getResMessage("paramsError", {
                         message: errorMessage,
                     });
@@ -506,7 +488,7 @@ class AuditLog {
 
                 let queryTextRead: string
                 let valuesRead: Array<any>
-                if (userId) {
+                if (userId || userId !== "") {
                     queryTextRead = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`
                     valuesRead = [tableName, logRecords, AuditLogTypes.READ, userId, new Date()]
                 } else {
@@ -520,13 +502,11 @@ class AuditLog {
                 break;
             case "login":
             case AuditLogTypes.LOGIN:
-                logRecords = logParams && logParams.logRecords ? logParams.logRecords : null;
-
                 // validate params/values
-                if (!logRecords) {
+                if (!logRecords || isEmptyObject(logRecords as ObjectRefType)) {
                     errorMessage = errorMessage + " | Login information is required."
                 }
-                if (errorMessage) {
+                if (errorMessage || errorMessage !== "") {
                     return getResMessage("paramsError", {
                         message: errorMessage,
                     });
@@ -534,7 +514,7 @@ class AuditLog {
                 tableName = tableName || "users"
                 let queryTextLogin: string
                 let valuesLogin: Array<any>
-                if (userId) {
+                if (userId || userId !== "") {
                     queryTextLogin = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`
                     valuesLogin = [tableName, logRecords, AuditLogTypes.LOGIN, userId, new Date()]
                 } else {
@@ -548,16 +528,14 @@ class AuditLog {
                 break;
             case "logout":
             case AuditLogTypes.LOGOUT:
-                logRecords = logParams && logParams.logRecords ? logParams.logRecords : null;
-
                 // validate params/values
-                if (!userId) {
+                if (!userId || userId === "") {
                     errorMessage = errorMessage + " | userId is required."
                 }
-                if (!logRecords || logRecords === "") {
+                if (!logRecords || isEmptyObject(logRecords as ObjectRefType)) {
                     errorMessage = errorMessage + " | Logout information is required."
                 }
-                if (errorMessage) {
+                if (errorMessage || errorMessage !== "") {
                     return getResMessage("paramsError", {
                         message: errorMessage,
                     });
@@ -573,17 +551,12 @@ class AuditLog {
                     message: "Unknown log type and/or incomplete log information",
                 });
         }
-
+        // perform insert task - insert audit record
         try {
-            // insert audit record
             const res = await this.dbHandle.query(query)
             if (res.rowCount > 0) {
                 return getResMessage("success", {
-                    value: {
-                        fields      : res.fields,
-                        records     : res.rows,
-                        recordsCount: res.rowCount,
-                    },
+                    value: res,
                 });
             } else {
                 return getResMessage("insertError", {
