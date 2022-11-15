@@ -3,7 +3,7 @@
 
 import {
     UserInfoType, CrudOptionsType, ActionParamType,
-    ActionParamsType, TaskTypes, QueryParamType,
+    ActionParamsType, TaskTypes, QueryParamsType,
 } from "../src"
 
 // Models
@@ -181,7 +181,7 @@ export const GetAuditByIds = ["40afeaf8-abbb-43be-9c44-1642f393f0e9",
     "5cd69f14-1945-400a-91fd-8ea6ca51cd64"] as Array<string>
 export const GetAuditByParams = {
     "logType": "create",
-} as QueryParamType
+} as QueryParamsType
 
 // 91b3c435-fce7-4d28-9e05-cc9feafb5b48
 // 708713f2-ea16-404a-959c-2cb5762c394a
@@ -198,7 +198,7 @@ export const DeleteAuditByIds = [
 
 export const DeleteAuditByParams = {
     "logType": "read",
-} as QueryParamType
+} as QueryParamsType
 
 export const UpdateAuditById = "d9cb7344-2c37-4492-9bf1-d6fa5ccc9634"
 export const UpdateAuditByIds = [
@@ -209,4 +209,4 @@ export const UpdateAuditByIds = [
 
 export const UpdateAuditByParams = {
     "logType": "read",
-} as QueryParamType
+} as QueryParamsType

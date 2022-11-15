@@ -18,13 +18,13 @@ import {
     TaskTypes
 } from "..";
 import {isEmptyObject} from "./validate";
-import {computeCreateQuery} from "./helpers/computeCreateQuery";
 import {
+    computeCreateQuery,
     computeUpdateQuery,
     computeUpdateQueryById,
     computeUpdateQueryByIds,
     computeUpdateQueryByParam
-} from "./helpers/computeUpdateQuery";
+} from "./helpers";
 
 class SaveRecord extends Crud {
     protected modelOptions: ModelOptionsType;

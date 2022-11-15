@@ -15,7 +15,7 @@ import {
     computeDeleteQueryById,
     computeDeleteQueryByIds,
     computeDeleteQueryByParam
-} from "./helpers/computeDeleteQuery";
+} from "./helpers";
 
 class DeleteRecord extends Crud {
     constructor(params: CrudParamsType, options: CrudOptionsType = {}) {

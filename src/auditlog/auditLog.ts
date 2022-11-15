@@ -9,14 +9,15 @@
 import {getResMessage, ResponseMessage} from "@mconnect/mcresponse";
 import {checkDb} from "../dbc";
 import {Pool} from "pg";
+import {LogRecordsType} from "../crud";
 
 //types
 export interface AuditLogOptionsType {
     tableName?: string;
-    logRecords?: any;
-    newLogRecords?: any;
-    recordParams?: any;
-    newRecordParams?: any;
+    logRecords?: LogRecordsType;
+    newLogRecords?: LogRecordsType;
+    recordParams?: LogRecordsType;
+    newRecordParams?: LogRecordsType;
     auditTable?: string;
 }
 
@@ -44,7 +45,7 @@ class AuditLog {
         return this.auditTable
     }
 
-    async createLog(tableName: string, logRecords: any, userId: string): Promise<ResponseMessage> {
+    async createLog(tableName: string, logRecords: LogRecordsType, userId: string): Promise<ResponseMessage> {
         const dbCheck = checkDb(this.dbHandle);
         if (dbCheck.code !== "success") {
             return dbCheck;
@@ -102,7 +103,7 @@ class AuditLog {
         }
     }
 
-    async updateLog(tableName: string, logRecords: any, newLogRecords: any, userId: string): Promise<ResponseMessage> {
+    async updateLog(tableName: string, logRecords: LogRecordsType, newLogRecords: LogRecordsType, userId: string): Promise<ResponseMessage> {
         const dbCheck = checkDb(this.dbHandle);
         if (!dbCheck) {
             return dbCheck;
@@ -163,7 +164,7 @@ class AuditLog {
         }
     }
 
-    async readLog(tableName: string, logRecords: any, userId: string = ""): Promise<ResponseMessage> {
+    async readLog(tableName: string, logRecords: LogRecordsType, userId: string = ""): Promise<ResponseMessage> {
         const dbCheck = checkDb(this.dbHandle);
         if (!dbCheck) {
             return dbCheck;
@@ -224,7 +225,7 @@ class AuditLog {
         }
     }
 
-    async deleteLog(tableName: string, logRecords: any, userId: string): Promise<ResponseMessage> {
+    async deleteLog(tableName: string, logRecords: LogRecordsType, userId: string): Promise<ResponseMessage> {
         const dbCheck = checkDb(this.dbHandle);
         if (!dbCheck) {
             return dbCheck;
@@ -281,7 +282,7 @@ class AuditLog {
         }
     }
 
-    async loginLog(logRecords: any, userId: string = "", tableName = "users"): Promise<ResponseMessage> {
+    async loginLog(logRecords: LogRecordsType, userId: string = "", tableName = "users"): Promise<ResponseMessage> {
         const dbCheck = checkDb(this.dbHandle);
         if (!dbCheck) {
             return dbCheck;
@@ -336,7 +337,7 @@ class AuditLog {
         }
     }
 
-    async logoutLog(logRecords: any, userId: string, tableName = "users"): Promise<ResponseMessage> {
+    async logoutLog(logRecords: LogRecordsType, userId: string, tableName = "users"): Promise<ResponseMessage> {
         const dbCheck = checkDb(this.dbHandle);
         if (!dbCheck) {
             return dbCheck;

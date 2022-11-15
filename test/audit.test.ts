@@ -1,15 +1,15 @@
 import {assertEquals, mcTest, postTestResult} from "@mconnect/mctest";
 import {MyDb} from "./config";
-import {AuditLogTypes, newAuditLog, newDbPg} from "../src";
+import {AuditLogTypes, LogRecordsType, newAuditLog, newDbPg} from "../src";
 
 //
 const tableName = "services"
 const userId = "085f48c5-8763-4e22-a1c6-ac1a68ba07de"
-const recs = {name: "Abi", desc: "Testing only", url: "localhost:9000", priority: 1, cost: 1000.00}
-const newRecs = {
-    name: "Abi Akindele", desc: "Testing only - updated", url: "localhost:9900", priority: 1, cost: 2000.00
-}
-const readP = {keywords: ["lagos", "nigeria", "ghana", "accra"]};
+const recs: LogRecordsType = {logRecords: {name: "Abi", desc: "Testing only", url: "localhost:9000", priority: 1, cost: 1000.00}}
+const newRecs: LogRecordsType = {logRecords: {
+        name: "Abi Akindele", desc: "Testing only - updated", url: "localhost:9900", priority: 1, cost: 2000.00
+    }}
+const readP: LogRecordsType = {logRecords: {keywords: ["lagos", "nigeria", "ghana", "accra"]}} ;
 
 let myDb = MyDb
 myDb.options = {}
@@ -33,7 +33,7 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
         name    : 'should store create-transaction log and return success:',
         testFunc: async () => {
             const res = await mcLog.auditLog(AuditLogTypes.CREATE, userId, {
-                tableName : tableName,
+                tableName    : tableName,
                 logRecords: recs,
             })
             assertEquals(res.code, "success", `res.Code should be: success`);
@@ -45,7 +45,7 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
         name    : 'should store update-transaction log and return success:',
         testFunc: async () => {
             const res = await mcLog.auditLog(AuditLogTypes.UPDATE, userId, {
-                tableName    : tableName,
+                tableName       : tableName,
                 logRecords   : recs,
                 newLogRecords: newRecs,
             })
@@ -57,7 +57,7 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
         name    : 'should store read-transaction log and return success:',
         testFunc: async () => {
             const res = await mcLog.auditLog(AuditLogTypes.READ, userId, {
-                tableName : tableName,
+                tableName    : tableName,
                 logRecords: readP,
             })
             assertEquals(res.code, "success", `res.Code should be: success`);
@@ -68,7 +68,7 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
         name    : 'should store delete-transaction log and return success:',
         testFunc: async () => {
             const res = await mcLog.auditLog(AuditLogTypes.DELETE, userId, {
-                tableName : tableName,
+                tableName    : tableName,
                 logRecords: recs,
             })
             assertEquals(res.code, "success", `res.Code should be: success`);
@@ -79,7 +79,7 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
         name    : 'should store login-transaction log and return success:',
         testFunc: async () => {
             const res = await mcLog.auditLog(AuditLogTypes.LOGIN, userId, {
-                tableName : tableName,
+                tableName    : tableName,
                 logRecords: recs,
             })
             assertEquals(res.code, "success", `res.Code should be: success`);
@@ -91,7 +91,7 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
         name    : 'should store logout-transaction log and return success:',
         testFunc: async () => {
             const res = await mcLog.auditLog(AuditLogTypes.LOGOUT, userId, {
-                tableName : tableName,
+                tableName    : tableName,
                 logRecords: recs,
             })
             assertEquals(res.code, "success", `res.Code should be: success`);
@@ -103,7 +103,7 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
         name    : 'should return paramsError for incomplete/undefined inputs:',
         testFunc: async () => {
             const res = await mcLog.auditLog(AuditLogTypes.CREATE, userId, {
-                tableName : "",
+                tableName    : "",
                 logRecords: recs,
             })
             assertEquals(res.code, "paramsError", `res.Code should be: paramsError`);

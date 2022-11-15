@@ -1,4 +1,4 @@
-import {DeleteQueryResult, QueryParamType} from "../types";
+import {DeleteQueryResult, QueryParamsType} from "../types";
 import {computeWhereQuery}                 from "./computeWhereQuery";
 import {isEmptyObject}                     from "../validate";
 
@@ -70,7 +70,7 @@ export function computeDeleteQueryByIds(tableName: string, recordIds: Array<stri
 }
 
 // computeDeleteQueryByParam function computes delete SQL-script by query-parameter specifications
-export function computeDeleteQueryByParam(tableName: string, queryParams: QueryParamType): DeleteQueryResult {
+export function computeDeleteQueryByParam(tableName: string, queryParams: QueryParamsType): DeleteQueryResult {
     try {
         // validate inputs
         if (tableName === "" || isEmptyObject(queryParams)) {

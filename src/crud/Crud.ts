@@ -15,7 +15,7 @@ import {
     CrudQueryFieldType,
     OkResponse, OwnerRecordCountResultType,
     ProjectParamType,
-    QueryParamType,
+    QueryParamsType,
     RecordCountResultType,
     RoleFuncType,
     RoleServiceResponseType,
@@ -32,7 +32,7 @@ import {
     computeSelectQueryById,
     computeSelectQueryByIds,
     computeSelectQueryByParams
-} from "./helpers/computeSelectQuery";
+} from "./helpers";
 import {toCamelCase} from "./utils";
 
 export class Crud {
@@ -44,7 +44,7 @@ export class Crud {
     protected readonly userInfo: UserInfoType;
     protected recordIds: Array<string>;       // to capture string-id | ObjectId
     protected actionParams: ActionParamsType;
-    protected queryParams: QueryParamType;
+    protected queryParams: QueryParamsType;
     protected readonly projectParams: ProjectParamType;
     protected readonly sortParams: SortParamType;
     protected taskType: TaskTypes | string;

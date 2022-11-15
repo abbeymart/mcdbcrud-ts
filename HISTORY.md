@@ -1,5 +1,10 @@
 # Historical logs
 
+## Version 0.5.0
+
+- Release date: Nov 18, 2022
+- Refactored audit-log-record-types-v0.5.0
+
 ## Version 0.4.0
 
 - Release date: June 18, 2022

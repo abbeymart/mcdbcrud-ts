@@ -11,7 +11,7 @@ import {
     computeSelectQueryAll,
     computeSelectQueryByIds,
     computeSelectQueryByParams
-} from "./helpers/computeSelectQuery";
+} from "./helpers";
 import { PoolClient } from "pg";
 
 const Cursor = require("pg-cursor")
