@@ -6,10 +6,10 @@
  */
 
 // Import required module/function
-import {getResMessage, ResponseMessage} from "@mconnect/mcresponse";
-import {checkDb} from "../dbc";
-import {Pool} from "pg";
-import {LogRecordsType} from "../crud";
+import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
+import { checkDb } from "../dbc";
+import { Pool } from "pg";
+import { LogRecordsType } from "../crud";
 
 //types
 export interface AuditLogOptionsType {
@@ -618,4 +618,4 @@ function newAuditLog(auditDb: Pool, auditTable = "audits") {
     return new AuditLog(auditDb, auditTable);
 }
 
-export {AuditLog, newAuditLog};
+export { AuditLog, newAuditLog };

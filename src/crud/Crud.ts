@@ -5,7 +5,7 @@
  */
 
 // Import required module/function(s)/types
-import {getResMessage, ResponseMessage} from "@mconnect/mcresponse";
+import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
 import {
     ActionParamsType,
     ActionParamType,
@@ -25,15 +25,15 @@ import {
     TaskTypes,
     UserInfoType,
 } from "./types";
-import {AuditLog, newAuditLog} from "../auditlog";
-import {Pool, PoolClient, QueryResult} from "pg";
+import { AuditLog, newAuditLog } from "../auditlog";
+import { Pool, PoolClient, QueryResult } from "pg";
 import {
     computeSelectQueryAll,
     computeSelectQueryById,
     computeSelectQueryByIds,
     computeSelectQueryByParams
 } from "./helpers";
-import {toCamelCase} from "./utils";
+import { toCamelCase } from "./utils";
 
 export class Crud {
     protected params: CrudParamsType;

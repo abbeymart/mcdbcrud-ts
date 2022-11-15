@@ -5,11 +5,11 @@
  */
 
 // Import required module(s)
-import {getHashCache, setHashCache} from "@mconnect/mccache";
-import {getResMessage, ResponseMessage} from "@mconnect/mcresponse";
-import {Crud} from "./Crud";
-import {CheckAccessType, CrudOptionsType, CrudParamsType, GetResultType, LogRecordsType, TaskTypes} from "./types";
-import {isEmptyObject} from "./validate";
+import { getHashCache, setHashCache } from "@mconnect/mccache";
+import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
+import { Crud } from "./Crud";
+import { CheckAccessType, CrudOptionsType, CrudParamsType, GetResultType, LogRecordsType, TaskTypes } from "./types";
+import { isEmptyObject } from "./validate";
 
 class GetRecord extends Crud {
     constructor(params: CrudParamsType, options: CrudOptionsType = {}) {
@@ -190,7 +190,7 @@ class GetRecord extends Crud {
                             }
                             // cache records not implemented, for consistency & performance reasons
                             // if (this.cacheGetResult) {
-                                // setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
+                            // setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
                             // }
                             return getResMessage("success", {
                                 value: resultValue,
@@ -248,4 +248,4 @@ function newGetRecord(params: CrudParamsType, options: CrudOptionsType = {}) {
     return new GetRecord(params, options);
 }
 
-export {GetRecord, newGetRecord};
+export { GetRecord, newGetRecord };

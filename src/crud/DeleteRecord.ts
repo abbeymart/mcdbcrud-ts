@@ -6,11 +6,11 @@
  */
 
 // Import required module/function(s)
-import {getResMessage, ResponseMessage} from "@mconnect/mcresponse";
-import {deleteHashCache} from "@mconnect/mccache";
-import {Crud} from "./Crud";
-import {CrudOptionsType, CrudParamsType, LogRecordsType, TaskTypes} from "./types";
-import {isEmptyObject} from "./validate";
+import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
+import { deleteHashCache } from "@mconnect/mccache";
+import { Crud } from "./Crud";
+import { CrudOptionsType, CrudParamsType, LogRecordsType, TaskTypes } from "./types";
+import { isEmptyObject } from "./validate";
 import {
     computeDeleteQueryById,
     computeDeleteQueryByIds,
@@ -271,4 +271,4 @@ function newDeleteRecord(params: CrudParamsType, options: CrudOptionsType = {}) 
     return new DeleteRecord(params, options);
 }
 
-export {DeleteRecord, newDeleteRecord};
+export { DeleteRecord, newDeleteRecord };

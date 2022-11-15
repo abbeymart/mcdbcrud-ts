@@ -6,9 +6,9 @@
  */
 
 // Import required module/function(s)
-import {getResMessage, ResponseMessage} from "@mconnect/mcresponse";
-import {deleteHashCache} from "@mconnect/mccache";
-import {Crud} from "./Crud";
+import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
+import { deleteHashCache } from "@mconnect/mccache";
+import { Crud } from "./Crud";
 import {
     ActionParamsType,
     ActionParamTaskType,
@@ -17,7 +17,7 @@ import {
     ModelOptionsType,
     TaskTypes
 } from "..";
-import {isEmptyObject} from "./validate";
+import { isEmptyObject } from "./validate";
 import {
     computeCreateQuery,
     computeUpdateQuery,
@@ -129,7 +129,7 @@ class SaveRecord extends Crud {
         }
 
         // update records/document(s) by queryParams: permitted for admin user only
-        if (this.taskType === TaskTypes.UPDATE && this.updateItems.length === 1 && !isEmptyObject(this.queryParams) ) {
+        if (this.taskType === TaskTypes.UPDATE && this.updateItems.length === 1 && !isEmptyObject(this.queryParams)) {
             try {
                 // check task-permission
                 if (this.checkAccess) {
@@ -595,4 +595,4 @@ function newSaveRecord(params: CrudParamsType, options: CrudOptionsType = {}) {
     return new SaveRecord(params, options);
 }
 
-export {SaveRecord, newSaveRecord};
+export { SaveRecord, newSaveRecord };
