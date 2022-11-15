@@ -196,22 +196,26 @@ export class Crud {
     // implement toString method
     protected toString = (): string => `CRUD Instance Information: ${this}`
 
-    // ownerRecordsCount method query DB-tables and returns ownerRecords (by userId), and ok and message
+    // ownerRecordsCount method query the current/instance DB-table and returns totalRecords for the current user
     async ownerRecordsCount(): Promise<OwnerRecordCountResultType> {
         try {
+            // validate userId
+            if (!this.userInfo.userId || this.userInfo.userId === "") {
+                throw new Error("userID is required")
+            }
             // count owner-records
             const ownerScript = `SELECT COUNT(*) AS ownerrows FROM ${this.table} WHERE created_by = $1`
             const ownerRowsRes = await this.appDb.query(ownerScript, [this.userInfo.userId])
-            const ownerRows = ownerRowsRes.rows[0].ownerrows
+            const ownerRows = Number(ownerRowsRes.rows[0].ownerrows)
             if (ownerRows < 1) {
                 return {
                     ownerRecords: 0,
                     ok          : false,
-                    message     : "Owner records count error - no records found",
+                    message     : "Owner records count - no records found",
                 }
             }
             return {
-                ownerRecords: Number(ownerRows),
+                ownerRecords: ownerRows,
                 ok          : true,
                 message     : "success",
             }
@@ -224,18 +228,18 @@ export class Crud {
         }
     }
 
-    // recordsCount method query DB-tables and returns totalRecords (by userId), and ok and message
+    // recordsCount method query the current/instance DB-table and returns totalRecords
     async recordsCount(): Promise<RecordCountResultType> {
         try {
             // totalRecordsCount from the table
             const countQuery = `SELECT COUNT(*) AS totalrows FROM ${this.table}`
             const countRowsRes = await this.appDb.query(countQuery)
-            const totalRows = countRowsRes.rows[0].totalrows
+            const totalRows = Number(countRowsRes.rows[0].totalrows)
             if (totalRows < 1) {
                 return {
                     totalRecords: 0,
                     ok          : false,
-                    message     : "Total records count error - no records found",
+                    message     : "Total records count - no records found",
                 }
             }
             return {
@@ -252,9 +256,9 @@ export class Crud {
         }
     }
 
-    // computeQueryRecords method computes, from db-result, the records of ActionParamsType (Array<object>)
+    // computeQueryRecords method computes and transform QueryResult and returns the result of ActionParamsType(Array<object>).
+    // Converts the field-names to camelCase for json-format response.
     computeQueryRecords(recRes: QueryResult): ActionParamsType {
-        // compute records
         let records: ActionParamsType = [];
         try {
             // record-fields
@@ -274,10 +278,10 @@ export class Crud {
         }
     }
 
-    // getCurrentRecords fetch records by recordIds, queryParams or all limited by this.limit and this.skip, if applicable
+    // getCurrentRecords fetch records by recordIds, queryParams or all-records, limited by this.limit and this.skip.
     async getCurrentRecords(by = ""): Promise<ResponseMessage> {
         try {
-            // validate models
+            // validate database
             const validDb = this.checkDb(this.appDb);
             if (validDb.code !== "success") {
                 return validDb;
@@ -401,7 +405,7 @@ export class Crud {
         // serviceIds: for serviceCategory (record, table, function, package, solution...)
         let roleServices: Array<RoleServiceResponseType> = [];
         try {
-            // validate models
+            // validate databases
             const validRoleServiceDb = await this.checkDb(this.accessDb);
             if (validRoleServiceDb.code !== "success") {
                 return [];
@@ -456,7 +460,7 @@ export class Crud {
     // checkAccess validate if current CRUD task is permitted based on defined/assigned roles
     async checkTaskAccess(userInfo: UserInfoType, recordIds: Array<string> = []): Promise<ResponseMessage> {
         try {
-            // validate models
+            // validate databases
             const validAccessDb = await this.checkDb(this.accessDb);
             if (validAccessDb.code !== "success") {
                 return validAccessDb;
@@ -756,7 +760,7 @@ export class Crud {
     // checkLoginStatus method checks if the user exists and has active login status/token
     async checkLoginStatus(): Promise<ResponseMessage> {
         try {
-            // validate models
+            // validate databases
             const validDb = await this.checkDb(this.appDb)
             if (validDb.code !== "success") {
                 return validDb;

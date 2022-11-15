@@ -30,18 +30,18 @@ export function validateActionParams(actParams: ActionParamsType = []): Response
     return getResMessage("success")
 }
 
-export function camelToUnderscore(key: string): string {
+// deprecated??
+export function camelToUnderscore1(key: string): string {
     return key.replace(/([A-Z])/g, "_$1").toLowerCase();
 }
 
-export const toCamelCase = (text: string, sep = '_') => {
+export const toCamelCase = (text: string, sep = '_'): string => {
     // accepts word/text and separator(' ', '_', '__', '.')
     const textArray = text.split(sep);
     // convert the first word to lowercase
     const firstWord = textArray[0].toLowerCase();
     // convert other words: first letter to upper case and other letters to lowercase
     const otherWords = textArray.slice(1,).map(item => {
-        // const itemList = item.split('');
         // convert first letter to upper case
         const item0 = item[0].toUpperCase();
         // convert other letters to lowercase
@@ -57,7 +57,7 @@ export const setContentBody = (fieldValue: string): string => {
     return gzippedBuffer.toString('base64');
 }
 
-export const getContentBody = (body: string) => {
+export const getContentBody = (body: string): string => {
     const gzippedBuffer = Buffer.from(body, 'base64');
     const unzippedBuffer = gunzipSync(gzippedBuffer);
     return unzippedBuffer.toString();
