@@ -21,7 +21,7 @@ export function checkDb(db: DbConnectionType): ResponseMessage {
     }
 }
 
-export function checkDbConnection(dbConnect: PoolClient): ResponseMessage {
+export function checkDbClient(dbConnect: PoolClient): ResponseMessage {
     if (dbConnect) {
         return getResMessage("success", {
             message: "valid database connection/handler",

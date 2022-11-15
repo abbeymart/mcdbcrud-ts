@@ -9,7 +9,8 @@
 import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
 import { checkDb } from "../dbc";
 import { Pool } from "pg";
-import { LogRecordsType } from "../crud";
+import { isEmptyObject, LogRecordsType, ObjectRefType } from "../crud";
+import { log } from "util";
 
 //types
 export interface AuditLogOptionsType {
@@ -45,23 +46,22 @@ class AuditLog {
         return this.auditTable
     }
 
-    async createLog(tableName: string, logRecords: LogRecordsType, userId: string): Promise<ResponseMessage> {
+    async createLog(userId: string, logParams: AuditLogOptionsType): Promise<ResponseMessage> {
         const dbCheck = checkDb(this.dbHandle);
         if (dbCheck.code !== "success") {
             return dbCheck;
         }
-
         // Check/validate the attributes / parameters
         let errorMessage = "";
-        if (!tableName) {
-            errorMessage = errorMessage ? errorMessage + " | Table or Collection name is required." :
-                "Table or Collection name is required.";
-        }
         if (!userId) {
             errorMessage = errorMessage ? errorMessage + " | userId is required." :
                 "userId is required.";
         }
-        if (!logRecords) {
+        if (!logParams.tableName) {
+            errorMessage = errorMessage ? errorMessage + " | Table or Collection name is required." :
+                "Table or Collection name is required.";
+        }
+        if (!logParams.logRecords || isEmptyObject(logParams.logRecords as ObjectRefType)) {
             errorMessage = errorMessage ? errorMessage + " | Created record(s) information is required." :
                 "Created record(s) information is required.";
         }
@@ -75,7 +75,7 @@ class AuditLog {
         try {
             // insert audit record
             const queryText = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at) VALUES($1, $2, $3, $4, $5);`
-            const values = [tableName, logRecords, AuditLogTypes.CREATE, userId, new Date()]
+            const values = [logParams.tableName, logParams.logRecords, AuditLogTypes.CREATE, userId, new Date()]
             const query = {
                 text  : queryText,
                 values: values,
@@ -83,15 +83,12 @@ class AuditLog {
             const res = await this.dbHandle.query(query)
             if (res.rowCount > 0) {
                 return getResMessage("success", {
-                    value: {
-                        fields : res.fields,
-                        records: res.rows,
-                    },
+                    value: res,
                 });
             } else {
                 return getResMessage("insertError", {
                     value  : res,
-                    message: "no response from the server",
+                    message: "create-log-records-error",
                 });
             }
         } catch (error) {
@@ -103,27 +100,26 @@ class AuditLog {
         }
     }
 
-    async updateLog(tableName: string, logRecords: LogRecordsType, newLogRecords: LogRecordsType, userId: string): Promise<ResponseMessage> {
+    async updateLog(userId: string, logParams: AuditLogOptionsType): Promise<ResponseMessage> {
         const dbCheck = checkDb(this.dbHandle);
         if (!dbCheck) {
             return dbCheck;
         }
-
         // Check/validate the attributes / parameters
         let errorMessage = "";
-        if (!tableName) {
-            errorMessage = errorMessage ? errorMessage + " | Table or Collection name is required." :
-                "Table or Collection name is required.";
-        }
         if (!userId) {
             errorMessage = errorMessage ? errorMessage + " | userId is required." :
                 "userId is required.";
         }
-        if (!logRecords) {
+        if (!logParams.tableName) {
+            errorMessage = errorMessage ? errorMessage + " | Table or Collection name is required." :
+                "Table or Collection name is required.";
+        }
+        if (!logParams.logRecords || isEmptyObject(logParams.logRecords as ObjectRefType)) {
             errorMessage = errorMessage ? errorMessage + " | Current record(s) information is required." :
                 "Current record(s) information is required.";
         }
-        if (!newLogRecords) {
+        if (!logParams.newLogRecords || isEmptyObject(logParams.newLogRecords as ObjectRefType)) {
             errorMessage = errorMessage ? errorMessage + " | Updated record(s) information is required." :
                 "Updated record(s) information is required.";
         }
@@ -136,7 +132,8 @@ class AuditLog {
         try {
             // insert audit record
             const queryText = `INSERT INTO ${this.auditTable}(table_name, log_records, new_log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5, $6);`
-            const values = [tableName, logRecords, newLogRecords, AuditLogTypes.UPDATE, userId, new Date()]
+            const values = [logParams.tableName, logParams.logRecords, logParams.newLogRecords, AuditLogTypes.UPDATE,
+                userId, new Date()]
             const query = {
                 text  : queryText,
                 values: values,
@@ -144,15 +141,12 @@ class AuditLog {
             const res = await this.dbHandle.query(query)
             if (res.rowCount > 0) {
                 return getResMessage("success", {
-                    value: {
-                        fields : res.fields,
-                        records: res.rows,
-                    },
+                    value: res,
                 });
             } else {
                 return getResMessage("insertError", {
                     value  : res,
-                    message: "no response from the server",
+                    message: "create-log-records-error",
                 });
             }
         } catch (error) {
@@ -164,19 +158,18 @@ class AuditLog {
         }
     }
 
-    async readLog(tableName: string, logRecords: LogRecordsType, userId: string = ""): Promise<ResponseMessage> {
+    async readLog(logParams: AuditLogOptionsType, userId: string = ""): Promise<ResponseMessage> {
         const dbCheck = checkDb(this.dbHandle);
         if (!dbCheck) {
             return dbCheck;
         }
-
         // validate params/values
         let errorMessage = "";
-        if (!tableName) {
+        if (!logParams.tableName) {
             errorMessage = errorMessage ? errorMessage + " | Table or Collection name is required." :
                 "Table or Collection name is required.";
         }
-        if (!logRecords) {
+        if (!logParams.logRecords || isEmptyObject(logParams.logRecords as ObjectRefType)) {
             errorMessage = errorMessage ?
                 errorMessage + " | Search keywords or Read record(s) information is required." :
                 "Search keywords or Read record(s) information is required.";
@@ -193,10 +186,10 @@ class AuditLog {
             let values: Array<any>
             if (userId) {
                 queryText = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`
-                values = [tableName, logRecords, AuditLogTypes.READ, userId, new Date()]
+                values = [logParams.tableName, logParams.logRecords, AuditLogTypes.READ, userId, new Date()]
             } else {
-                queryText = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_at ) VALUES($1, $2, $3, $4);"
-                values = [tableName, logRecords, AuditLogTypes.READ, new Date()]
+                queryText = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_at ) VALUES($1, $2, $3, $4);`
+                values = [logParams.tableName, logParams.logRecords, AuditLogTypes.READ, new Date()]
             }
             const query = {
                 text  : queryText,
@@ -205,15 +198,12 @@ class AuditLog {
             const res = await this.dbHandle.query(query)
             if (res.rowCount > 0) {
                 return getResMessage("success", {
-                    value: {
-                        fields : res.fields,
-                        records: res.rows,
-                    },
+                    value: res,
                 });
             } else {
                 return getResMessage("insertError", {
                     value  : res,
-                    message: "no response from the server",
+                    message: "create-log-records-error",
                 });
             }
         } catch (error) {
@@ -225,23 +215,22 @@ class AuditLog {
         }
     }
 
-    async deleteLog(tableName: string, logRecords: LogRecordsType, userId: string): Promise<ResponseMessage> {
+    async deleteLog(userId: string, logParams: AuditLogOptionsType): Promise<ResponseMessage> {
         const dbCheck = checkDb(this.dbHandle);
         if (!dbCheck) {
             return dbCheck;
         }
-
         // Check/validate the attributes / parameters
         let errorMessage = "";
-        if (!tableName) {
-            errorMessage = errorMessage ? errorMessage + " | Table or Collection name is required." :
-                "Table or Collection name is required.";
-        }
         if (!userId) {
             errorMessage = errorMessage ? errorMessage + " | userId is required." :
                 "userId is required.";
         }
-        if (!logRecords) {
+        if (!logParams.tableName) {
+            errorMessage = errorMessage ? errorMessage + " | Table or Collection name is required." :
+                "Table or Collection name is required.";
+        }
+        if (!logParams.logRecords || isEmptyObject(logParams.logRecords as ObjectRefType)) {
             errorMessage = errorMessage ? errorMessage + " | Deleted record(s) information is required." :
                 "Deleted record(s) information is required.";
         }
@@ -254,7 +243,7 @@ class AuditLog {
         try {
             // insert audit record
             const queryText = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`
-            const values = [tableName, logRecords, AuditLogTypes.DELETE, userId, new Date()]
+            const values = [logParams.tableName, logParams.logRecords, AuditLogTypes.DELETE, userId, new Date()]
             const query = {
                 text  : queryText,
                 values: values,
@@ -262,15 +251,12 @@ class AuditLog {
             const res = await this.dbHandle.query(query)
             if (res.rowCount > 0) {
                 return getResMessage("success", {
-                    value: {
-                        fields : res.fields,
-                        records: res.rows,
-                    },
+                    value: res,
                 });
             } else {
                 return getResMessage("insertError", {
                     value  : res,
-                    message: "no response from the server",
+                    message: "create-log-records-error",
                 });
             }
         } catch (error) {
@@ -282,14 +268,15 @@ class AuditLog {
         }
     }
 
-    async loginLog(logRecords: LogRecordsType, userId: string = "", tableName = "users"): Promise<ResponseMessage> {
+    async loginLog(logParams: AuditLogOptionsType, userId: string = "", tableName = "users"): Promise<ResponseMessage> {
         const dbCheck = checkDb(this.dbHandle);
         if (!dbCheck) {
             return dbCheck;
         }
         // validate params/values
         let errorMessage = "";
-        if (!logRecords) {
+        const logTableName = logParams.tableName || tableName;
+        if (!logParams.logRecords || isEmptyObject(logParams.logRecords as ObjectRefType)) {
             errorMessage = errorMessage + " | Login information is required."
         }
         if (errorMessage) {
@@ -304,12 +291,11 @@ class AuditLog {
             let values: Array<any>
             if (userId) {
                 queryText = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`
-                values = [tableName, logRecords, AuditLogTypes.LOGIN, userId, new Date()]
+                values = [logTableName, logParams.logRecords, AuditLogTypes.LOGIN, userId, new Date()]
             } else {
-                queryText = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_at ) VALUES($1, $2, $3, $4);"
-                values = [tableName, logRecords, AuditLogTypes.LOGIN, new Date()]
+                queryText = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_at ) VALUES($1, $2, $3, $4);`
+                values = [logTableName, logParams.logRecords, AuditLogTypes.LOGIN, new Date()]
             }
-
             const query = {
                 text  : queryText,
                 values: values,
@@ -318,14 +304,15 @@ class AuditLog {
             if (res.rowCount > 0) {
                 return getResMessage("success", {
                     value: {
-                        fields : res.fields,
-                        records: res.rows,
+                        fields      : res.fields,
+                        records     : res.rows,
+                        recordsCount: res.rowCount,
                     },
                 });
             } else {
                 return getResMessage("insertError", {
                     value  : res,
-                    message: "no response from the server",
+                    message: "create-log-records-error",
                 });
             }
         } catch (error) {
@@ -337,18 +324,18 @@ class AuditLog {
         }
     }
 
-    async logoutLog(logRecords: LogRecordsType, userId: string, tableName = "users"): Promise<ResponseMessage> {
+    async logoutLog(userId: string, logParams: AuditLogOptionsType, tableName = "users"): Promise<ResponseMessage> {
         const dbCheck = checkDb(this.dbHandle);
         if (!dbCheck) {
             return dbCheck;
         }
-
         // validate params/values
         let errorMessage = "";
+        const logTableName = logParams.tableName || tableName;
         if (!userId) {
             errorMessage = errorMessage + " | userId is required."
         }
-        if (!logRecords || logRecords === "") {
+        if (!logParams.logRecords || isEmptyObject(logParams.logRecords as ObjectRefType)) {
             errorMessage = errorMessage + " | Logout information is required."
         }
         if (errorMessage) {
@@ -360,7 +347,7 @@ class AuditLog {
         try {
             // insert audit record
             const queryText = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`
-            const values = [tableName, logRecords, AuditLogTypes.LOGOUT, userId, new Date()]
+            const values = [logTableName, logParams.logRecords, AuditLogTypes.LOGOUT, userId, new Date()]
             const query = {
                 text  : queryText,
                 values: values,
@@ -368,15 +355,12 @@ class AuditLog {
             const res = await this.dbHandle.query(query)
             if (res.rowCount > 0) {
                 return getResMessage("success", {
-                    value: {
-                        fields : res.fields,
-                        records: res.rows,
-                    },
+                    value: res,
                 });
             } else {
                 return getResMessage("insertError", {
                     value  : res,
-                    message: "no response from the server",
+                    message: "create-log-records-error",
                 });
             }
         } catch (error) {
@@ -388,16 +372,15 @@ class AuditLog {
         }
     }
 
-    async auditLog(logType: string, userId: string = "", options?: AuditLogOptionsType) {
+    async auditLog(logType: string, logParams: AuditLogOptionsType, userId: string = "") {
         const dbCheck = checkDb(this.dbHandle);
         if (!dbCheck) {
             return dbCheck;
         }
-
-        // Check/validate the attributes / parameters
+        // Check/validate the attributes / parameters by logTypes (create, update, delete, read, login, logout...)
         let tableName = "",
-            logRecords = null,
-            newLogRecords = null,
+            logRecords: LogRecordsType = {},
+            newLogRecords: LogRecordsType = {},
             errorMessage = "",
             query: { text: string; values: Array<any> } = {text: "", values: []};
 
@@ -406,8 +389,9 @@ class AuditLog {
         switch (logType) {
             case "create":
             case AuditLogTypes.CREATE:
-                tableName = options && options.tableName ? options.tableName : "";
-                logRecords = options && options.logRecords ? options.logRecords : null;
+                tableName = logParams && logParams.tableName ? logParams.tableName : "";
+                logRecords = logParams && logParams.logRecords && !isEmptyObject(logParams.logRecords) ?
+                    logParams.logRecords : {};
                 // validate params/values
                 if (!tableName) {
                     errorMessage = errorMessage ? errorMessage + " | Table or Collection name is required." :
@@ -434,9 +418,11 @@ class AuditLog {
                 break;
             case "update":
             case AuditLogTypes.UPDATE:
-                tableName = options && options.tableName ? options.tableName : "";
-                logRecords = options && options.logRecords ? options.logRecords : null;
-                newLogRecords = options && options.newLogRecords ? options.newLogRecords : null; // object or array
+                tableName = logParams && logParams.tableName ? logParams.tableName : "";
+                logRecords = logParams && logParams.logRecords && !isEmptyObject(logParams.logRecords) ?
+                    logParams.logRecords : {};
+                newLogRecords = logParams && logParams.newLogRecords && !isEmptyObject(logParams.newLogRecords) ?
+                    logParams.newLogRecords : {}; // object or array
 
                 // validate params/values
                 if (!tableName) {
@@ -469,8 +455,8 @@ class AuditLog {
             case "delete":
             case AuditLogTypes.DELETE:
             case AuditLogTypes.REMOVE:
-                tableName = options && options.tableName ? options.tableName : "";
-                logRecords = options && options.logRecords ? options.logRecords : null;
+                tableName = logParams && logParams.tableName ? logParams.tableName : "";
+                logRecords = logParams && logParams.logRecords ? logParams.logRecords : {};
 
                 // Check/validate the attributes / parameters
                 if (!tableName) {
@@ -499,8 +485,8 @@ class AuditLog {
             case "read":
             case AuditLogTypes.GET:
             case AuditLogTypes.READ:
-                tableName = options && options.tableName ? options.tableName : "";
-                logRecords = options && options.logRecords ? options.logRecords : null;
+                tableName = logParams && logParams.tableName ? logParams.tableName : "";
+                logRecords = logParams && logParams.logRecords ? logParams.logRecords : null;
 
                 // validate params/values
                 if (!tableName) {
@@ -534,7 +520,7 @@ class AuditLog {
                 break;
             case "login":
             case AuditLogTypes.LOGIN:
-                logRecords = options && options.logRecords ? options.logRecords : null;
+                logRecords = logParams && logParams.logRecords ? logParams.logRecords : null;
 
                 // validate params/values
                 if (!logRecords) {
@@ -562,7 +548,7 @@ class AuditLog {
                 break;
             case "logout":
             case AuditLogTypes.LOGOUT:
-                logRecords = options && options.logRecords ? options.logRecords : null;
+                logRecords = logParams && logParams.logRecords ? logParams.logRecords : null;
 
                 // validate params/values
                 if (!userId) {
@@ -594,14 +580,15 @@ class AuditLog {
             if (res.rowCount > 0) {
                 return getResMessage("success", {
                     value: {
-                        fields : res.fields,
-                        records: res.rows,
+                        fields      : res.fields,
+                        records     : res.rows,
+                        recordsCount: res.rowCount,
                     },
                 });
             } else {
                 return getResMessage("insertError", {
                     value  : res,
-                    message: "no response from the server",
+                    message: "create-log-records-error",
                 });
             }
         } catch (error) {

@@ -4,7 +4,7 @@
  * @Description: common validation functions
  */
 import {type} from "os";
-import {ObjectType} from "./types";
+import { MessageObject, ObjectRefType, ObjectType } from "./types";
 
 export const isProvided = (param: any): boolean => {
     // Verify the Required status
@@ -72,7 +72,7 @@ export const isEmpty = (param: any): boolean => {
 };
 
 
-export const isEmptyObject = (val: ObjectType): boolean => {
+export const isEmptyObject = (val: ObjectRefType): boolean => {
     // return !(Object.keys(val).length > 0 && Object.values(val).length > 0);
     return typeof val === "object"? !(Object.keys(val).length > 0 && Object.values(val).length > 0) : false;
 }
