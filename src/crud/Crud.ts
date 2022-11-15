@@ -289,14 +289,13 @@ export class Crud {
             // totalRecordsCount from the table
             const recordsCountRes = await this.recordsCount()
             const totalRows = recordsCountRes.totalRecords
-            if (totalRows < 1) {
+            if (!recordsCountRes.ok || totalRows < 1) {
                 return getResMessage("notFound", {
                     message: recordsCountRes.message,
                 })
             }
             let selectQueryResult: SelectQueryResult
             let recRes: QueryResult
-            // let recFields: Array<string>
 
             switch (by.toLowerCase()) {
                 case "id":
@@ -318,6 +317,7 @@ export class Crud {
                             value  : {
                                 selectQuery: selectQueryResult.selectQueryObject.selectQuery,
                                 fieldValues: selectQueryResult.selectQueryObject.fieldValues,
+                                recordIds  : this.recordIds,
                             }
                         })
                     }
@@ -336,8 +336,6 @@ export class Crud {
                             value  : {
                                 selectQuery: selectQueryResult.selectQueryObject.selectQuery,
                                 fieldValues: selectQueryResult.selectQueryObject.fieldValues,
-                                modelRef   : this.modelRef,
-                                table      : this.table,
                                 queryParams: this.queryParams,
                             }
                         })
@@ -371,14 +369,14 @@ export class Crud {
                 // update crud instance current-records value
                 this.currentRecs = records;
                 return getResMessage("success", {
-                    message: "Current document/record(s) retrieved successfully.",
+                    message: "Current record(s) retrieved successfully.",
                     value  : {
                         records: records,
                         stats  : {
                             skip             : this.skip,
                             limit            : this.limit,
                             recordsCount     : records.length,
-                            totalRecordsCount: Number(totalRows),
+                            totalRecordsCount: totalRows,
                         },
                     }
                 });
@@ -508,7 +506,7 @@ export class Crud {
                     }
                 }
             }
-            // TODO: create-task, ownerPermission
+            // TODO: create-task, ownerPermission - OPTIONAL step, review
             const excludedTables = ["users", "apps", "groups", "roles"]
             if (this.taskType === TaskTypes.CREATE && !excludedTables.includes(this.table)) {
                 ownerPermitted = true
