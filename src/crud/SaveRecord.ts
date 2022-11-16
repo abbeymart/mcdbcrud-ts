@@ -331,7 +331,7 @@ class SaveRecord extends Crud {
                     message: message,
                     value  : {
                         createQuery : createQueryObject.createQuery,
-                        fieldValues: createQueryObject.fieldValues,
+                        fieldValues1: [...createQueryObject.fieldValues[0]],
                     }
                 })
             }
@@ -410,10 +410,12 @@ class SaveRecord extends Crud {
             await client.query("BEGIN")
             for await (const updateQueryObject of updateQueryObjects) {
                 const res = await client.query(updateQueryObject.updateQuery, updateQueryObject.fieldValues)
-                recordsCount += res.rowCount
-                if (res.rowCount && res.rows[0].id) {
+                if (res.rowCount > 0 && res.rows[0].id) {
                     recordIds.push(res.rows[0].id)
+                } else {
+                    throw new Error("Unable to create new record(s), database error.")
                 }
+                recordsCount += res.rowCount
             }
             if (recordsCount > 0 && recordsCount === recordIds.length) {
                 // delete cache
@@ -454,7 +456,7 @@ class SaveRecord extends Crud {
     }
 
     async updateRecordById(): Promise<ResponseMessage> {
-        if (this.updateItems.length < 1) {
+        if (this.actionParams.length < 1) {
             return getResMessage("insertError", {
                 message: "Unable to update record(s), due to incomplete/incorrect input-parameters. ",
             });
@@ -469,7 +471,7 @@ class SaveRecord extends Crud {
             // update one record
             if (this.recordIds.length === 1) {
                 // destruct id /other attributes
-                const {id, ...otherParams} = this.updateItems[0];
+                const {id, ...otherParams} = this.actionParams[0];
 
                 const {updateQueryObject, ok, message} = computeUpdateQueryById(this.table, otherParams, id)
                 if (!ok) {
@@ -484,16 +486,18 @@ class SaveRecord extends Crud {
                 // trx starts | include returning id for each update
                 await client.query('BEGIN')
                 const res = await client.query(updateQueryObject.updateQuery, updateQueryObject.fieldValues)
-                recordsCount += res.rowCount
-                if (res.rowCount && res.rows[0].id) {
+                if (res.rowCount > 0 && res.rows[0].id) {
                     recordIds.push(res.rows[0].id)
+                } else {
+                    throw new Error("Unable to create new record(s), database error.")
                 }
+                recordsCount += res.rowCount
                 // trx ends
             }
             // update multiple records
             if (this.recordIds.length > 1) {
                 // destruct id /other attributes
-                const {id, ...otherParams} = this.updateItems[0];
+                const {id, ...otherParams} = this.actionParams[0];
                 const {
                     updateQueryObject,
                     ok,
@@ -511,8 +515,14 @@ class SaveRecord extends Crud {
                 // trx starts
                 await client.query('BEGIN')
                 const res = await client.query(updateQueryObject.updateQuery, updateQueryObject.fieldValues)
+                if (res.rowCount > 0 && res.rows[0].id) {
+                    // recordIds.push(res.rows[0].id)
+                    recordIds = res.rows.map(row => row.id)
+                } else {
+                    throw new Error("Unable to create new record(s), database error.")
+                }
                 recordsCount += res.rowCount
-                recordIds = this.recordIds
+                // recordIds = this.recordIds
                 // trx ends
             }
             if (recordsCount > 0 && recordsCount === this.recordIds.length) {
@@ -561,7 +571,7 @@ class SaveRecord extends Crud {
         let recordsCount = 0
         try {
             // destruct id /other attributes
-            const {id, ...otherParams} = this.updateItems[0];
+            const {id, ...otherParams} = this.actionParams[0];
             // include item stamps: userId and date
             if (this.modelOptions.actorStamp) {
                 otherParams.updatedBy = this.userId;
@@ -586,6 +596,9 @@ class SaveRecord extends Crud {
             // trx starts
             await client.query('BEGIN')
             const res = await client.query(updateQueryObject.updateQuery, updateQueryObject.fieldValues)
+            if (res.rowCount < 1) {
+                throw new Error("Unable to create new record(s), database error.")
+            }
             recordsCount += res.rowCount
             // trx ends
             if (recordsCount > 0) {
