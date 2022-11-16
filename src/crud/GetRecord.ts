@@ -10,6 +10,7 @@ import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
 import { Crud } from "./Crud";
 import { CheckAccessType, CrudOptionsType, CrudParamsType, GetResultType, LogRecordsType, TaskTypes } from "./types";
 import { isEmptyObject } from "./validate";
+import { AuditLogOptionsType } from "../auditlog";
 
 class GetRecord extends Crud {
     constructor(params: CrudParamsType, options: CrudOptionsType = {}) {
@@ -46,13 +47,25 @@ class GetRecord extends Crud {
         let logRes: ResponseMessage;
         if ((this.logRead || this.logCrud) && this.queryParams && !isEmptyObject(this.queryParams)) {
             const logRecs: LogRecordsType = {logRecords: this.queryParams}
-            logRes = await this.transLog.readLog(this.table, logRecs, this.userId);
+            const logParams: AuditLogOptionsType = {
+                tableName    : this.table,
+                logRecords   : logRecs,
+            }
+            logRes = await this.transLog.readLog(logParams, this.userId);
         } else if ((this.logRead || this.logCrud) && this.recordIds && this.recordIds.length > 0) {
             const logRecs: LogRecordsType = {logRecords: this.recordIds}
-            logRes = await this.transLog.readLog(this.table, logRecs, this.userId);
+            const logParams: AuditLogOptionsType = {
+                tableName    : this.table,
+                logRecords   : logRecs,
+            }
+            logRes = await this.transLog.readLog(logParams, this.userId);
         } else {
             const logRecs: LogRecordsType = {logRecords: "all"}
-            logRes = await this.transLog.readLog(this.table, logRecs, this.userId);
+            const logParams: AuditLogOptionsType = {
+                tableName    : this.table,
+                logRecords   : logRecs,
+            }
+            logRes = await this.transLog.readLog(logParams, this.userId);
         }
 
         // check cache for matching record(s), and return if exist

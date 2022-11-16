@@ -16,6 +16,7 @@ import {
     computeDeleteQueryByIds,
     computeDeleteQueryByParam
 } from "./helpers";
+import { AuditLogOptionsType } from "../auditlog";
 
 class DeleteRecord extends Crud {
     constructor(params: CrudParamsType, options: CrudOptionsType = {}) {
@@ -136,7 +137,11 @@ class DeleteRecord extends Crud {
             let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
             if (this.logDelete || this.logCrud) {
                 const logRecs: LogRecordsType = {logRecords: this.currentRecs}
-                logRes = await this.transLog.deleteLog(this.table, logRecs, this.userId);
+                const logParams: AuditLogOptionsType = {
+                    tableName : this.table,
+                    logRecords: logRecs,
+                }
+                logRes = await this.transLog.deleteLog(this.userId, logParams);
             }
             return getResMessage("success", {
                 message: "Record/document deleted successfully",
@@ -184,7 +189,11 @@ class DeleteRecord extends Crud {
             let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
             if (this.logDelete || this.logCrud) {
                 const logRecs: LogRecordsType = {logRecords: this.currentRecs}
-                logRes = await this.transLog.deleteLog(this.table, logRecs, this.userId);
+                const logParams: AuditLogOptionsType = {
+                    tableName : this.table,
+                    logRecords: logRecs,
+                }
+                logRes = await this.transLog.deleteLog(this.userId, logParams);
             }
             return getResMessage("success", {
                 message: "Record/document deleted successfully",
@@ -233,7 +242,11 @@ class DeleteRecord extends Crud {
                 let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
                 if (this.logDelete || this.logCrud) {
                     const logRecs: LogRecordsType = {logRecords: this.currentRecs}
-                    logRes = await this.transLog.deleteLog(this.table, logRecs, this.userId);
+                    const logParams: AuditLogOptionsType = {
+                        tableName : this.table,
+                        logRecords: logRecs,
+                    }
+                    logRes = await this.transLog.deleteLog(this.userId, logParams);
                 }
                 return getResMessage("success", {
                     message: "Record/document deleted successfully",
