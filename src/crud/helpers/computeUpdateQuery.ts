@@ -88,14 +88,14 @@ export function computeUpdateQueryById(tableName: string, actionParam: ActionPar
         const {id, ...updateParam} = actionParam
         // compute update script and associated place-holder values for the actionParam/record
         let updateQuery = `UPDATE ${tableName} SET `
-        let fieldNames: Array<string> = []
         let fieldValues: Array<any> = []
-        let fieldsLength = Object.keys(updateParam).length
+        const fieldNames = Object.keys(updateParam).map(it => camelToUnderscore(it))
+        const fieldsLength = fieldNames.length
         let fieldCount = 0
         for (const [fieldName, fieldValue] of Object.entries(updateParam)) {
             // next placeholder-value-position
             fieldCount += 1
-            fieldNames.push(camelToUnderscore(fieldName))
+            // fieldNames.push(camelToUnderscore(fieldName))
             fieldValues.push(fieldValue)
             updateQuery += `${camelToUnderscore(fieldName)}=$${fieldCount}`
             if (fieldsLength > 1 && fieldCount < fieldsLength) {
@@ -129,17 +129,18 @@ export function computeUpdateQueryByIds(tableName: string, actionParam: ActionPa
         if (tableName === "" || isEmptyObject(actionParam) || recordIds.length < 1) {
             return errMessage("tableName, record-ids and actionParam are required.")
         }
-        let fieldNames: Array<string> = []
-        let fieldValues: Array<any> = []
+
         const {id, ...updateParam} = actionParam
         // compute update script and associated place-holder values for the actionParam/record
         let updateQuery = `UPDATE ${tableName} SET `
-        let fieldsLength = Object.keys(updateParam).length
+        const fieldNames = Object.keys(updateParam).map(it => camelToUnderscore(it))
+        const fieldsLength = fieldNames.length
+        let fieldValues: Array<any> = []
         let fieldCount = 0
         for (const [fieldName, fieldValue] of Object.entries(updateParam)) {
             // next placeholder-value-position | TODO: refactor for fieldValue-types
             fieldCount += 1
-            fieldNames.push(camelToUnderscore(fieldName))
+            // fieldNames.push(camelToUnderscore(fieldName))
             fieldValues.push(fieldValue)
             updateQuery += `${camelToUnderscore(fieldName)}=$${fieldCount}`
             if (fieldsLength > 1 && fieldCount < fieldsLength) {
@@ -179,17 +180,18 @@ export function computeUpdateQueryByParam(tableName: string, actionParam: Action
         if (tableName === "" || isEmptyObject(actionParam) || !queryParams) {
             return errMessage("tableName, queryParams (where-conditions) and actionParam are required.")
         }
-        let fieldNames: Array<string> = []
-        let fieldValues: Array<any> = []
+
         // compute update script and associated place-holder values for the actionParam/record
         const {id, ...updateParam} = actionParam
         let updateQuery = `UPDATE ${tableName} SET `
-        let fieldsLength = Object.keys(updateParam).length
+        const fieldNames = Object.keys(updateParam).map(it => camelToUnderscore(it))
+        const fieldsLength = fieldNames.length
+        let fieldValues: Array<any> = []
         let fieldCount = 0
         for (const [fieldName, fieldValue] of Object.entries(updateParam)) {
             // next placeholder-value-position
             fieldCount += 1
-            fieldNames.push(camelToUnderscore(fieldName))
+            // fieldNames.push(camelToUnderscore(fieldName))
             fieldValues.push(fieldValue)
             updateQuery += `${camelToUnderscore(fieldName)}=$${fieldCount}`
             if (fieldsLength > 1 && fieldCount < fieldsLength) {
