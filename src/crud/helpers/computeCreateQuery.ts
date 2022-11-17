@@ -1,5 +1,5 @@
-import {ActionParamsType, CreateQueryResult} from "../types";
-import {camelToUnderscore} from "../utils";
+import { ActionParamsType, CreateQueryResult } from "../types";
+import { camelToUnderscore } from "../utils";
 
 const errMessage = (message: string) => {
     return {
@@ -20,15 +20,10 @@ export function computeCreateQuery(tableName: string, actionParams: ActionParams
         if (tableName === "" || actionParams.length < 1) {
             return errMessage("tableName and actionParams(records) are required.")
         }
-        // declare variable for create/insert query
-        let createQuery: string
-        // let fieldNames: Array<string> = []
-        // let fieldNamesUnderscore: Array<string> = []
-        // compute fields, fieldsUnderscore, create-query from the first-record of the actionParams
+        // compute fieldNames, itemQuery and itemValuePlaceholder from the first-record of the actionParams
         let itemQuery = `INSERT INTO ${tableName}` + "("
         let itemValuePlaceholder = " VALUES("
         const fieldNames = Object.keys(actionParams[0])
-        const fieldNamesUnderscore = fieldNames.map(it => camelToUnderscore(it))
         const fieldsLength = fieldNames.length
         let fieldCount = 0
         for (const fieldName of fieldNames) {
@@ -43,21 +38,21 @@ export function computeCreateQuery(tableName: string, actionParams: ActionParams
         // close item-script/value-placeholder
         itemQuery += ")"
         itemValuePlaceholder += ")"
-        // add/append item-script & value-placeholder to the createScript
-        createQuery = itemQuery + itemValuePlaceholder
+        // compute createQuery from itemQuery and itemValuePlaceholder
+        let createQuery = itemQuery + itemValuePlaceholder
+        // add the returning ID option for the createQuery
         createQuery += " RETURNING id"
 
-        // compute field-values from actionParams
-        let fieldValues: Array<Array<any>> = []
         // compute create-record-values from actionParams/records, in order of the field-names sequence
-        // value-computation for each of the actionParams / records must match the base record-fields
+        let fieldValues: Array<Array<any>> = []
         for (const rec of actionParams) {
-            // item-values-computation variable
+            // compute item-values
             let recFieldValues: Array<any> = []
             for (const fieldName of fieldNames) {
                 const fieldValue = rec[fieldName]
+                // fieldValue must be defined/valid
                 if (typeof fieldValue === "undefined" || fieldName === undefined) {
-                    return errMessage(`Record #${JSON.stringify(rec)} is missing the required field - ${fieldName} `)
+                    return errMessage(`Record #${JSON.stringify(rec)} is missing the required field - ${fieldName}`)
                 }
                 recFieldValues.push(fieldValue)
             }
@@ -68,7 +63,7 @@ export function computeCreateQuery(tableName: string, actionParams: ActionParams
         return {
             createQueryObject: {
                 createQuery: createQuery,
-                fieldNames : fieldNamesUnderscore,
+                fieldNames : fieldNames.map(it => camelToUnderscore(it)),   // underscore fieldNames
                 fieldValues: fieldValues,
             },
             ok               : true,
