@@ -7,7 +7,7 @@
 
 // Import required module/function(s)
 import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
-import { deleteHashCache } from "@mconnect/mccache";
+import { deleteHashCache, QueryHashCacheParamsType } from "@mconnect/mccache";
 import { Crud } from "./Crud";
 import {
     ActionParamsType,
@@ -349,7 +349,12 @@ class SaveRecord extends Crud {
             // trx ends
             if (recordsCount > 0 && recordsCount === recordIds.length) {
                 // delete cache
-                deleteHashCache(this.cacheKey, this.table, "hash");
+                const cacheParams: QueryHashCacheParamsType = {
+                    key: this.cacheKey,
+                    hash: this.table,
+                    by: "hash",
+                }
+                deleteHashCache(cacheParams);
                 // check the audit-log settings - to perform audit-log
                 let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
                 if (this.logCreate || this.logCrud) {
@@ -419,7 +424,12 @@ class SaveRecord extends Crud {
             }
             if (recordsCount > 0 && recordsCount === recordIds.length) {
                 // delete cache
-                await deleteHashCache(this.cacheKey, this.table, "hash");
+                const cacheParams: QueryHashCacheParamsType = {
+                    key: this.cacheKey,
+                    hash: this.table,
+                    by: "hash",
+                }
+                await deleteHashCache(cacheParams);
                 // check the audit-log settings - to perform audit-log
                 let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
                 if (this.logUpdate || this.logCrud) {
@@ -527,7 +537,12 @@ class SaveRecord extends Crud {
             }
             if (recordsCount > 0 && recordsCount === this.recordIds.length) {
                 // delete cache
-                await deleteHashCache(this.cacheKey, this.table, "hash");
+                const cacheParams: QueryHashCacheParamsType = {
+                    key: this.cacheKey,
+                    hash: this.table,
+                    by: "hash",
+                }
+                await deleteHashCache(cacheParams);
                 // check the audit-log settings - to perform audit-log
                 let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
                 if (this.logUpdate || this.logCrud) {
@@ -603,7 +618,12 @@ class SaveRecord extends Crud {
             // trx ends
             if (recordsCount > 0) {
                 // delete cache
-                await deleteHashCache(this.cacheKey, this.table, "hash");
+                const cacheParams: QueryHashCacheParamsType = {
+                    key: this.cacheKey,
+                    hash: this.table,
+                    by: "hash",
+                }
+                await deleteHashCache(cacheParams);
                 // check the audit-log settings - to perform audit-log
                 let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
                 if (this.logUpdate || this.logCrud) {

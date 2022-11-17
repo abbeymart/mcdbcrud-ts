@@ -7,7 +7,7 @@
 
 // Import required module/function(s)
 import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
-import { deleteHashCache } from "@mconnect/mccache";
+import { deleteHashCache, QueryHashCacheParamsType } from "@mconnect/mccache";
 import { Crud } from "./Crud";
 import { CrudOptionsType, CrudParamsType, LogRecordsType, TaskTypes } from "./types";
 import { isEmptyObject } from "./validate";
@@ -132,7 +132,12 @@ class DeleteRecord extends Crud {
             const res = await this.appDb.query(deleteQueryObject.deleteQuery, deleteQueryObject.fieldValues)
             // trx ends
             // delete cache
-            deleteHashCache(this.cacheKey, this.table);
+            const cacheParams: QueryHashCacheParamsType = {
+                key: this.cacheKey,
+                hash: this.table,
+                by: "hash",
+            }
+            deleteHashCache(cacheParams);
             // check the audit-log settings - to perform audit-log
             let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
             if (this.logDelete || this.logCrud) {
@@ -184,7 +189,12 @@ class DeleteRecord extends Crud {
             const res = await this.appDb.query(deleteQueryObject.deleteQuery, deleteQueryObject.fieldValues)
             // trx ends
             // delete cache
-            deleteHashCache(this.cacheKey, this.table);
+            const cacheParams: QueryHashCacheParamsType = {
+                key: this.cacheKey,
+                hash: this.table,
+                by: "hash",
+            }
+            deleteHashCache(cacheParams);
             // check the audit-log settings - to perform audit-log
             let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
             if (this.logDelete || this.logCrud) {
@@ -237,7 +247,12 @@ class DeleteRecord extends Crud {
                 const res = await this.appDb.query(deleteQueryObject.deleteQuery, deleteQueryObject.fieldValues)
                 // trx ends
                 //delete cache
-                deleteHashCache(this.cacheKey, this.table);
+                const cacheParams: QueryHashCacheParamsType = {
+                    key: this.cacheKey,
+                    hash: this.table,
+                    by: "hash",
+                }
+                deleteHashCache(cacheParams);
                 // check the audit-log settings - to perform audit-log
                 let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
                 if (this.logDelete || this.logCrud) {

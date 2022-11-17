@@ -5,7 +5,7 @@
  */
 
 // Import required module(s)
-import { getHashCache, setHashCache } from "@mconnect/mccache";
+import { getHashCache, HashCacheParamsType, QueryHashCacheParamsType, setHashCache } from "@mconnect/mccache";
 import { getResMessage, ResponseMessage } from "@mconnect/mcresponse";
 import { Crud } from "./Crud";
 import { CheckAccessType, CrudOptionsType, CrudParamsType, GetResultType, LogRecordsType, TaskTypes } from "./types";
@@ -48,22 +48,22 @@ class GetRecord extends Crud {
         if ((this.logRead || this.logCrud) && this.queryParams && !isEmptyObject(this.queryParams)) {
             const logRecs: LogRecordsType = {logRecords: this.queryParams}
             const logParams: AuditLogOptionsType = {
-                tableName    : this.table,
-                logRecords   : logRecs,
+                tableName : this.table,
+                logRecords: logRecs,
             }
             logRes = await this.transLog.readLog(logParams, this.userId);
         } else if ((this.logRead || this.logCrud) && this.recordIds && this.recordIds.length > 0) {
             const logRecs: LogRecordsType = {logRecords: this.recordIds}
             const logParams: AuditLogOptionsType = {
-                tableName    : this.table,
-                logRecords   : logRecs,
+                tableName : this.table,
+                logRecords: logRecs,
             }
             logRes = await this.transLog.readLog(logParams, this.userId);
         } else {
             const logRecs: LogRecordsType = {logRecords: "all"}
             const logParams: AuditLogOptionsType = {
-                tableName    : this.table,
-                logRecords   : logRecs,
+                tableName : this.table,
+                logRecords: logRecs,
             }
             logRes = await this.transLog.readLog(logParams, this.userId);
         }
@@ -71,7 +71,11 @@ class GetRecord extends Crud {
         // check cache for matching record(s), and return if exist
         if (this.getFromCache) {
             try {
-                const cacheRes = await getHashCache(this.cacheKey, this.table);
+                const cacheParams: QueryHashCacheParamsType = {
+                    key : this.cacheKey,
+                    hash: this.table,
+                }
+                const cacheRes = await getHashCache(cacheParams);
                 if (cacheRes && cacheRes.value) {
                     console.log("cache-items-before-query: ", cacheRes.value.records[0]);
                     return getResMessage("success", {
@@ -102,7 +106,13 @@ class GetRecord extends Crud {
                         logRes,
                     }
                     if (this.cacheGetResult) {
-                        setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
+                        const cacheParams: HashCacheParamsType = {
+                            key   : this.cacheKey,
+                            hash  : this.table,
+                            value : resultValue,
+                            expire: this.cacheExpire,
+                        }
+                        setHashCache(cacheParams);
                     }
                     return getResMessage("success", {
                         value: resultValue,
@@ -137,7 +147,13 @@ class GetRecord extends Crud {
                         logRes,
                     }
                     if (this.cacheGetResult) {
-                        setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
+                        const cacheParams: HashCacheParamsType = {
+                            key   : this.cacheKey,
+                            hash  : this.table,
+                            value : resultValue,
+                            expire: this.cacheExpire,
+                        }
+                        setHashCache(cacheParams);
                     }
                     return getResMessage("success", {
                         value: resultValue,
