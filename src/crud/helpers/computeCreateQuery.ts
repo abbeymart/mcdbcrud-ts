@@ -38,7 +38,7 @@ export function computeCreateQuery(tableName: string, actionParams: ActionParams
         // close item-script/value-placeholder
         itemQuery += ")"
         itemValuePlaceholder += ")"
-        // compute createQuery from itemQuery and itemValuePlaceholder
+        // compute createQuery script from itemQuery and itemValuePlaceholder
         let createQuery = itemQuery + itemValuePlaceholder
         // add the returning ID option for the createQuery
         createQuery += " RETURNING id"

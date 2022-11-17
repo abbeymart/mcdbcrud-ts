@@ -36,8 +36,8 @@ export function computeUpdateQuery(tableName: string, actionParams: ActionParams
         if (tableName === "" || actionParams.length < 1) {
             return errMessageUpdates("tableName and actionParam are required.")
         }
+        // compute updateQuery scripts from actionParams
         let updateQueryObjects: Array<UpdateQueryObject> = []
-
         for (const actParam of actionParams) {
             const {id, ...updateParam} = actParam
             // compute update script and associated place-holder values for the actionParam/record
@@ -49,7 +49,6 @@ export function computeUpdateQuery(tableName: string, actionParams: ActionParams
             for (const [fieldName, fieldValue] of Object.entries(updateParam)) {
                 // next placeholder-value-position
                 fieldCount += 1
-                // fieldNames.push(camelToUnderscore(fieldName))
                 fieldValues.push(fieldValue)
                 updateQuery += `${camelToUnderscore(fieldName)}=$${fieldCount}`
                 if (fieldsLength > 1 && fieldCount < fieldsLength) {
@@ -85,8 +84,8 @@ export function computeUpdateQueryById(tableName: string, actionParam: ActionPar
         if (tableName === "" || isEmptyObject(actionParam) || recordId === "") {
             return errMessage("tableName, record-id and actionParam are required.")
         }
-        const {id, ...updateParam} = actionParam
         // compute update script and associated place-holder values for the actionParam/record
+        const {id, ...updateParam} = actionParam
         let updateQuery = `UPDATE ${tableName} SET `
         let fieldValues: Array<any> = []
         const fieldNames = Object.keys(updateParam).map(it => camelToUnderscore(it))
@@ -95,14 +94,13 @@ export function computeUpdateQueryById(tableName: string, actionParam: ActionPar
         for (const [fieldName, fieldValue] of Object.entries(updateParam)) {
             // next placeholder-value-position
             fieldCount += 1
-            // fieldNames.push(camelToUnderscore(fieldName))
             fieldValues.push(fieldValue)
             updateQuery += `${camelToUnderscore(fieldName)}=$${fieldCount}`
             if (fieldsLength > 1 && fieldCount < fieldsLength) {
                 updateQuery += ", "
             }
         }
-        // add where condition by id and the placeholder-value position
+        // add where condition by recordId and the placeholder-value position
         updateQuery += ` WHERE id=$${++fieldCount}`
         updateQuery += " RETURNING id"
         // add id-placeholder-value
@@ -129,35 +127,33 @@ export function computeUpdateQueryByIds(tableName: string, actionParam: ActionPa
         if (tableName === "" || isEmptyObject(actionParam) || recordIds.length < 1) {
             return errMessage("tableName, record-ids and actionParam are required.")
         }
-
+        // compute updateQuery script and associated place-holder values for the actionParam/record
         const {id, ...updateParam} = actionParam
-        // compute update script and associated place-holder values for the actionParam/record
         let updateQuery = `UPDATE ${tableName} SET `
         const fieldNames = Object.keys(updateParam).map(it => camelToUnderscore(it))
         const fieldsLength = fieldNames.length
         let fieldValues: Array<any> = []
         let fieldCount = 0
         for (const [fieldName, fieldValue] of Object.entries(updateParam)) {
-            // next placeholder-value-position | TODO: refactor for fieldValue-types
+            // next placeholder-value-position
             fieldCount += 1
-            // fieldNames.push(camelToUnderscore(fieldName))
             fieldValues.push(fieldValue)
             updateQuery += `${camelToUnderscore(fieldName)}=$${fieldCount}`
             if (fieldsLength > 1 && fieldCount < fieldsLength) {
                 updateQuery += ", "
             }
         }
-        // add where condition by id and the placeholder-value position
+        // add where condition by recordIds and the placeholder-value position
         const idLen = recordIds.length
-        let recIds = "("
+        let idValues = "("
         for (let i = 0; i < idLen; i++) {
-            recIds += "'" + recordIds[i] + "'"
+            idValues += "'" + recordIds[i] + "'"
             if (i < idLen - 1) {
-                recIds += ", "
+                idValues += ", "
             }
         }
-        recIds += ")"
-        updateQuery += ` WHERE id IN ${recIds}`
+        idValues += ")"
+        updateQuery += ` WHERE id IN ${idValues}`
 
         return {
             updateQueryObject: {
@@ -191,7 +187,6 @@ export function computeUpdateQueryByParam(tableName: string, actionParam: Action
         for (const [fieldName, fieldValue] of Object.entries(updateParam)) {
             // next placeholder-value-position
             fieldCount += 1
-            // fieldNames.push(camelToUnderscore(fieldName))
             fieldValues.push(fieldValue)
             updateQuery += `${camelToUnderscore(fieldName)}=$${fieldCount}`
             if (fieldsLength > 1 && fieldCount < fieldsLength) {
@@ -204,9 +199,9 @@ export function computeUpdateQueryByParam(tableName: string, actionParam: Action
             return errMessage(message)
         }
 
-        // add where condition by id
+        // add whereQuery condition by queryParams
         updateQuery += whereQueryObject.whereQuery
-        // add id-placeholder-value
+        // add whereQuery placeholder values
         fieldValues = fieldValues.concat(whereQueryObject.fieldValues)
 
         return {
