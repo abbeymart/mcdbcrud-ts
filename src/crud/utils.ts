@@ -31,7 +31,7 @@ export function validateActionParams(actParams: ActionParamsType = []): Response
 }
 
 // deprecated??
-export function camelToUnderscore1(key: string): string {
+export function camelToUnderscore(key: string): string {
     return key.replace(/([A-Z])/g, "_$1").toLowerCase();
 }
 
