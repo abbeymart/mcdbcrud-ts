@@ -29,7 +29,7 @@ const errMessageUpdates = (message: string) => {
     }
 }
 
-// computeUpdateQuery function computes update SQL script. It returns updateScript, updateValues any and/or err error
+// computeUpdateQuery function computes update SQL script. It returns updateScript, updateValues any and/or err error.
 export function computeUpdateQuery(tableName: string, actionParams: ActionParamsType): MultiUpdateQueryResult {
     try {
         // validate inputs
@@ -78,7 +78,7 @@ export function computeUpdateQuery(tableName: string, actionParams: ActionParams
     }
 }
 
-// computeUpdateQueryById function computes update SQL-script by recordId. It returns updateScript, updateValues any and/or err error
+// computeUpdateQueryById function computes update SQL-script by recordId. It returns updateScript, updateValues any and/or err error.
 export function computeUpdateQueryById(tableName: string, actionParam: ActionParamType, recordId: string): UpdateQueryResult {
     try {
         // validate inputs
@@ -122,7 +122,7 @@ export function computeUpdateQueryById(tableName: string, actionParam: ActionPar
     }
 }
 
-// computeUpdateQueryByIds function computes update SQL-script by recordIds. It returns updateScript, updateValues any and/or err error
+// computeUpdateQueryByIds function computes update SQL-script by recordIds. It returns updateScript, updateValues any and/or err error.
 export function computeUpdateQueryByIds(tableName: string, actionParam: ActionParamType, recordIds: Array<string>): UpdateQueryResult {
     try {
         // validate inputs
@@ -172,7 +172,7 @@ export function computeUpdateQueryByIds(tableName: string, actionParam: ActionPa
     }
 }
 
-// computeUpdateQueryByParam function computes update SQL scripts by queryParams. It returns updateScript, updateValues any and/or err error
+// computeUpdateQueryByParam function computes update SQL scripts by queryParams. It returns updateScript, updateValues any and/or err error.
 export function computeUpdateQueryByParam(tableName: string, actionParam: ActionParamType, queryParams: QueryParamsType): UpdateQueryResult {
     try {
         // validate inputs

@@ -13,7 +13,7 @@ const errMessage = (message: string) => {
     }
 }
 
-// computeWhereQuery function computes the multi-cases where-conditions for crud-operations
+// computeWhereQuery function computes the multi-cases where-conditions for crud-operations.
 export function computeWhereQuery(queryParams: QueryParamsType, fieldPosition: number): WhereQueryResult {
     try {
         // validate inputs

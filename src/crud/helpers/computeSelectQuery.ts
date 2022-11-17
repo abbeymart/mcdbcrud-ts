@@ -16,7 +16,7 @@ const errMessage = (message: string) => {
 }
 
 // computeSelectQueryAll compose select SQL script to retrieve all table-records.
-// The query may be constraint by skip(offset) and limit options
+// The query may be constraint by skip(offset) and limit crud-options.
 export function computeSelectQueryAll(modelRef: ActionParamType, tableName: string, options: CrudOptionsType = {}): SelectQueryResult {
     try {
         // validate inputs
@@ -59,7 +59,7 @@ export function computeSelectQueryAll(modelRef: ActionParamType, tableName: stri
     }
 }
 
-// computeSelectQueryById compose select SQL-script by id
+// computeSelectQueryById compose select SQL-script by id.
 export function computeSelectQueryById(modelRef: ActionParamType, tableName: string, recordId: string, options: CrudOptionsType = {}): SelectQueryResult {
     try {
         // validate inputs
@@ -102,7 +102,7 @@ export function computeSelectQueryById(modelRef: ActionParamType, tableName: str
     }
 }
 
-// computeSelectQueryByIds compose select SQL-script by ids
+// computeSelectQueryByIds compose select SQL-script by ids.
 export function computeSelectQueryByIds(modelRef: ActionParamType, tableName: string, recordIds: Array<string>, options: CrudOptionsType = {}): SelectQueryResult {
     try {
         // validate inputs
@@ -123,16 +123,16 @@ export function computeSelectQueryByIds(modelRef: ActionParamType, tableName: st
         }
 
         const idLen = recordIds.length
-        let recIds = "("
+        let inValues = "("
         for (let i = 0; i < idLen; i++) {
-            recIds += "'" + recordIds[i] + "'"
+            inValues += "'" + recordIds[i] + "'"
             if (i < idLen - 1) {
-                recIds += ", "
+                inValues += ", "
             }
         }
-        recIds += ")"
+        inValues += ")"
 
-        let selectQuery = `SELECT ${fieldText} FROM ${tableName} WHERE id IN ${recIds}`
+        let selectQuery = `SELECT ${fieldText} FROM ${tableName} WHERE id IN ${inValues}`
         // const selectValues = [`(${recordIds.join(", ")})`]
 
         // adjust selectQuery for skip and limit options
@@ -157,7 +157,7 @@ export function computeSelectQueryByIds(modelRef: ActionParamType, tableName: st
     }
 }
 
-// computeSelectQueryByParam compose SELECT query from the where-parameters
+// computeSelectQueryByParam compose SELECT query from the where-parameters.
 export function computeSelectQueryByParams(modelRef: ActionParamType, tableName: string, queryParams: QueryParamsType, options: CrudOptionsType = {}): SelectQueryResult {
     try {
         // validate inputs

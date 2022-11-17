@@ -13,7 +13,7 @@ const errMessage = (message: string) => {
     }
 }
 
-// computeCreateQuery function computes insert SQL scripts. It returns createScripts []string and err error
+// computeCreateQuery function computes insert SQL scripts. It returns createScripts []string and err error.
 export function computeCreateQuery(tableName: string, actionParams: ActionParamsType): CreateQueryResult {
     try {
         // validate inputs

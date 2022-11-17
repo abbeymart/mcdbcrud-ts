@@ -13,7 +13,7 @@ const errMessage = (message: string) => {
     }
 }
 
-// computeDeleteQueryById function computes delete SQL-script by id
+// computeDeleteQueryById function computes delete SQL-script by id.
 export function computeDeleteQueryById(tableName: string, recordId: string): DeleteQueryResult {
     try {
 
@@ -36,7 +36,7 @@ export function computeDeleteQueryById(tableName: string, recordId: string): Del
     }
 }
 
-// computeDeleteQueryByIds function computes delete SQL-script by ids
+// computeDeleteQueryByIds function computes delete SQL-script by ids.
 export function computeDeleteQueryByIds(tableName: string, recordIds: Array<string>): DeleteQueryResult {
     try {
         // validate inputs
@@ -45,16 +45,16 @@ export function computeDeleteQueryByIds(tableName: string, recordIds: Array<stri
         }
 
         const idLen = recordIds.length
-        let recIds = "("
+        let inValues = "("
         for (let i = 0; i < idLen; i++) {
-            recIds += "'" + recordIds[i] + "'"
+            inValues += "'" + recordIds[i] + "'"
             if (i < idLen - 1) {
-                recIds += ", "
+                inValues += ", "
             }
         }
-        recIds += ")"
+        inValues += ")"
 
-        const deleteQuery = `DELETE FROM ${tableName} WHERE id IN ${recIds}`
+        const deleteQuery = `DELETE FROM ${tableName} WHERE id IN ${inValues}`
 
         return {
             deleteQueryObject: {
@@ -83,7 +83,7 @@ export function computeDeleteQueryByParam(tableName: string, queryParams: QueryP
         if (!ok) {
             return errMessage(message)
         }
-
+        // update query with whereQuery
         deleteQuery += whereQueryObject.whereQuery
 
         return {
