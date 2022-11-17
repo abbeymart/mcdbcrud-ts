@@ -26,7 +26,7 @@ class DeleteRecord extends Crud {
     }
 
     async deleteRecord(): Promise<ResponseMessage> {
-        // Check/validate the attributes / parameters
+        // Check/validate the databases
         const dbCheck = this.checkDb(this.appDb);
         if (dbCheck.code !== "success") {
             return dbCheck;
