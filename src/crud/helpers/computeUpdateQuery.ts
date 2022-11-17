@@ -43,13 +43,13 @@ export function computeUpdateQuery(tableName: string, actionParams: ActionParams
             // compute update script and associated place-holder values for the actionParam/record
             let updateQuery = `UPDATE ${tableName} SET `
             let fieldValues: Array<any> = []
-            let fieldNames: Array<string> = []
-            let fieldsLength = Object.keys(updateParam).length
+            const fieldNames = Object.keys(updateParam).map(it => camelToUnderscore(it))
+            const fieldsLength = fieldNames.length
             let fieldCount = 0
             for (const [fieldName, fieldValue] of Object.entries(updateParam)) {
                 // next placeholder-value-position
                 fieldCount += 1
-                fieldNames.push(camelToUnderscore(fieldName))
+                // fieldNames.push(camelToUnderscore(fieldName))
                 fieldValues.push(fieldValue)
                 updateQuery += `${camelToUnderscore(fieldName)}=$${fieldCount}`
                 if (fieldsLength > 1 && fieldCount < fieldsLength) {
