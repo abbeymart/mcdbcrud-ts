@@ -61,8 +61,8 @@ export const CrudParamOptions: CrudOptionsType = {
     logUpdate     : true,
     logDelete     : true,
     logRead       : true,
-    logLogin      : false,
-    logLogout     : false,
+    logLogin      : true,
+    logLogout     : true,
     maxQueryLimit : 10000,
     msgFrom       : "support@mconnect.biz",
     cacheGetResult: false,
@@ -171,7 +171,7 @@ export const AuditUpdateRecordByParam: ActionParamType = {
     "logType"      : TaskTypes.UPDATE,
 }
 
-// GetIds: for get-records by ids & params | TODO: update ids after create
+// GetIds: for get-records by ids & params
 
 export const GetAuditById = "40afeaf8-abbb-43be-9c44-1642f393f0e9"
 export const GetAuditByIds = ["40afeaf8-abbb-43be-9c44-1642f393f0e9",
@@ -180,17 +180,12 @@ export const GetAuditByParams: QueryParamsType = {
     "logType": "create",
 }
 
-// 91b3c435-fce7-4d28-9e05-cc9feafb5b48
-// 708713f2-ea16-404a-959c-2cb5762c394a
-// 05a85b66-d68a-4f46-834d-b1c4f9c58a6c
-// 03a24b50-9cf2-40b4-9375-1ad6b9831310
-// 19209e24-d8cc-45a1-a7e9-4d7646b886f6
 export const DeleteAuditById = "d9cb7344-2c37-4492-9bf1-d6fa5ccc9634"
 export const DeleteAuditByIds: Array<string> = [
     "40afeaf8-abbb-43be-9c44-1642f393f0e9",
+    "5cd69f14-1945-400a-91fd-8ea6ca51cd64",
     "3e56eb70-9fa1-4881-b8b4-11a114cb5673",
-    "2cb32875-2268-4636-a2da-298611a19fd3",
-    "7bedcf6d-d229-4553-9ff0-19011e7ac0ff",
+    "91b3c435-fce7-4d28-9e05-cc9feafb5b48",
 ]
 
 export const DeleteAuditByParams: QueryParamsType = {
@@ -201,7 +196,7 @@ export const UpdateAuditById = "d9cb7344-2c37-4492-9bf1-d6fa5ccc9634"
 export const UpdateAuditByIds:Array<string>  = [
     "d9cb7344-2c37-4492-9bf1-d6fa5ccc9634",
     "40afeaf8-abbb-43be-9c44-1642f393f0e9",
-    "8d090d92-a916-4683-8619-4aa1484c6544",
+    "5cd69f14-1945-400a-91fd-8ea6ca51cd64",
 ]
 
 export const UpdateAuditByParams:QueryParamsType = {
