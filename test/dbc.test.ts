@@ -8,11 +8,6 @@ myDb.options = {}
 
 const dbc = newDbPg(myDb, myDb.options);
 
-// const sqliteDb = {
-//     dbType  : "sqlite3",
-//     filename: "testdb.db",
-// } as DbConfigType;
-
 (async () => {
     await mcTest({
         name    : "should successfully connect to the PostgresDB - Client",

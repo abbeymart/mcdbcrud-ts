@@ -18,7 +18,7 @@ export interface AuditType {
     logAt: Date;
 }
 
-export const AuditModel = {
+export const AuditModel: AuditType = {
     id           : "",
     tableName    : "",
     logRecords   : null,
@@ -26,7 +26,7 @@ export const AuditModel = {
     logType      : "",
     logBy        : "",
     logAt        : new Date(),
-} as AuditType
+}
 
 export const AuditTable = "audits"
 export const GetTable = "audits"
@@ -34,9 +34,9 @@ export const DeleteTable = "audits_delete"
 export const DeleteAllTable = "audits_delete_all"
 export const UpdateTable = "audits_update"
 
-export const UserId = "c85509ac-7373-464d-b667-425bb59b5738" // TODO: review/update
+export const UserId = "c85509ac-7373-464d-b667-425bb59b5738"
 
-export const TestUserInfo = {
+export const TestUserInfo: UserInfoType = {
     userId   : "c85509ac-7373-464d-b667-425bb59b5738",
     loginName: "abbeymart",
     email    : "abbeya1@yahoo.com",
@@ -45,10 +45,9 @@ export const TestUserInfo = {
     lastname : "Akindele",
     token    : "",
     expire   : 0,
-    roleId   : "",
-} as UserInfoType
+}
 
-export const CrudParamOptions = {
+export const CrudParamOptions: CrudOptionsType = {
     checkAccess   : false,
     auditTable    : "audits",
     userTable     : "users",
@@ -68,61 +67,59 @@ export const CrudParamOptions = {
     msgFrom       : "support@mconnect.biz",
     cacheGetResult: false,
     getFromCache  : false,
-} as CrudOptionsType
+}
 
-// TODO: create/update, get & delete records for groups & categories tables
-
-export const LogRecords = {
+export const LogRecords: ActionParamType = {
     "name"    : "Abi",
     "desc"    : "Testing only",
     "url"     : "localhost:9000",
     "priority": 100,
     "cost"    : 1000.00,
-} as ActionParamType
+}
 
-export const NewLogRecords = {
+export const NewLogRecords: ActionParamType = {
     "name"    : "Abi Akindele",
     "desc"    : "Testing only - updated",
     "url"     : "localhost:9900",
     "priority": 1,
     "cost"    : 2000.00,
-} as ActionParamType
+}
 
-export const LogRecords2 = {
+export const LogRecords2: ActionParamType = {
     "name"    : "Ola",
     "desc"    : "Testing only - 2",
     "url"     : "localhost:9000",
     "priority": 1,
     "cost"    : 10000.00,
-} as ActionParamType
+}
 
-export const NewLogRecords2 = {
+export const NewLogRecords2: ActionParamType = {
     "name"    : "Ola",
     "desc"    : "Testing only - 2 - updated",
     "url"     : "localhost:9000",
     "priority": 1,
     "cost"    : 20000.00,
-} as ActionParamType
+}
 
 // create record(s)
 
-export const AuditCreateRec1 = {
+export const AuditCreateRec1: ActionParamType = {
     "tableName" : "audits",
     "logAt"     : new Date(),
     "logBy"     : UserId,
     "logRecords": LogRecords,
     "logType"   : TaskTypes.CREATE,
-} as ActionParamType
+}
 
-export const AuditCreateRec2 = {
+export const AuditCreateRec2: ActionParamType = {
     "tableName" : "audits",
     "logAt"     : new Date(),
     "logBy"     : UserId,
     "logRecords": LogRecords2,
     "logType"   : TaskTypes.CREATE,
-} as ActionParamType
+}
 
-export const AuditUpdateRec1 = {
+export const AuditUpdateRec1: ActionParamType = {
     "id"           : "c1c3f614-b10d-40a4-9269-4e03f5fcf55e",
     "tableName"    : "todos",
     "logAt"        : new Date(),
@@ -130,9 +127,9 @@ export const AuditUpdateRec1 = {
     "logRecords"   : LogRecords,
     "newLogRecords": NewLogRecords,
     "logType"      : TaskTypes.UPDATE,
-} as ActionParamType
+}
 
-export const AuditUpdateRec2 = {
+export const AuditUpdateRec2: ActionParamType = {
     "id"           : "003c1422-c7cb-476f-b96f-9c8028e04a14",
     "tableName"    : "todos",
     "logAt"        : new Date(),
@@ -140,21 +137,21 @@ export const AuditUpdateRec2 = {
     "logRecords"   : LogRecords2,
     "newLogRecords": NewLogRecords2,
     "logType"      : TaskTypes.UPDATE,
-} as ActionParamType
+}
 
-export const AuditCreateActionParams = [
+export const AuditCreateActionParams: ActionParamsType = [
     AuditCreateRec1,
     AuditCreateRec2,
-] as ActionParamsType
+]
 
-export const AuditUpdateActionParams = [
+export const AuditUpdateActionParams: ActionParamsType = [
     AuditUpdateRec1,
     AuditUpdateRec2,
-] as ActionParamsType
+]
 
 // TODO: update and delete params, by ids / queryParams
 
-export const AuditUpdateRecordById = {
+export const AuditUpdateRecordById: ActionParamType = {
     "id"           : "a345c33f-d9bf-47a4-aab5-3979528a0972",
     "tableName"    : "groups",
     "logAt"        : new Date(),
@@ -162,9 +159,9 @@ export const AuditUpdateRecordById = {
     "logRecords"   : LogRecords,
     "newLogRecords": NewLogRecords,
     "logType"      : TaskTypes.DELETE,
-} as ActionParamType
+}
 
-export const AuditUpdateRecordByParam = {
+export const AuditUpdateRecordByParam: ActionParamType = {
     "id"           : "d9cb7344-2c37-4492-9bf1-d6fa5ccc9634",
     "tableName"    : "contacts",
     "logAt"        : new Date(),
@@ -172,16 +169,16 @@ export const AuditUpdateRecordByParam = {
     "logRecords"   : LogRecords,
     "newLogRecords": NewLogRecords,
     "logType"      : TaskTypes.UPDATE,
-} as ActionParamType
+}
 
 // GetIds: for get-records by ids & params | TODO: update ids after create
 
 export const GetAuditById = "40afeaf8-abbb-43be-9c44-1642f393f0e9"
 export const GetAuditByIds = ["40afeaf8-abbb-43be-9c44-1642f393f0e9",
     "5cd69f14-1945-400a-91fd-8ea6ca51cd64"] as Array<string>
-export const GetAuditByParams = {
+export const GetAuditByParams: QueryParamsType = {
     "logType": "create",
-} as QueryParamsType
+}
 
 // 91b3c435-fce7-4d28-9e05-cc9feafb5b48
 // 708713f2-ea16-404a-959c-2cb5762c394a
@@ -189,24 +186,24 @@ export const GetAuditByParams = {
 // 03a24b50-9cf2-40b4-9375-1ad6b9831310
 // 19209e24-d8cc-45a1-a7e9-4d7646b886f6
 export const DeleteAuditById = "d9cb7344-2c37-4492-9bf1-d6fa5ccc9634"
-export const DeleteAuditByIds = [
+export const DeleteAuditByIds: Array<string> = [
     "40afeaf8-abbb-43be-9c44-1642f393f0e9",
     "3e56eb70-9fa1-4881-b8b4-11a114cb5673",
     "2cb32875-2268-4636-a2da-298611a19fd3",
     "7bedcf6d-d229-4553-9ff0-19011e7ac0ff",
-] as Array<string>
+]
 
-export const DeleteAuditByParams = {
+export const DeleteAuditByParams: QueryParamsType = {
     "logType": "read",
-} as QueryParamsType
+}
 
 export const UpdateAuditById = "d9cb7344-2c37-4492-9bf1-d6fa5ccc9634"
-export const UpdateAuditByIds = [
+export const UpdateAuditByIds:Array<string>  = [
     "d9cb7344-2c37-4492-9bf1-d6fa5ccc9634",
     "40afeaf8-abbb-43be-9c44-1642f393f0e9",
     "8d090d92-a916-4683-8619-4aa1484c6544",
-] as Array<string>
+]
 
-export const UpdateAuditByParams = {
+export const UpdateAuditByParams:QueryParamsType = {
     "logType": "read",
-} as QueryParamsType
+}
