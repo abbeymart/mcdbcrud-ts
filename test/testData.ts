@@ -3,7 +3,7 @@
 
 import {
     UserInfoType, CrudOptionsType, ActionParamType,
-    ActionParamsType, TaskTypes, QueryParamsType,
+    ActionParamsType, TaskTypes, QueryParamsType, LogRecordsType,
 } from "../src"
 
 // Models
@@ -11,8 +11,8 @@ import {
 export interface AuditType {
     id: string;
     tableName: string;
-    logRecords: any;
-    newLogRecords: any;
+    logRecords: LogRecordsType;
+    newLogRecords: LogRecordsType;
     logType: string;
     logBy: string;
     logAt: Date;
@@ -21,8 +21,8 @@ export interface AuditType {
 export const AuditModel: AuditType = {
     id           : "",
     tableName    : "",
-    logRecords   : null,
-    newLogRecords: null,
+    logRecords   : {},
+    newLogRecords: {},
     logType      : "",
     logBy        : "",
     logAt        : new Date(),
