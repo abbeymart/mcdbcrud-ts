@@ -13,7 +13,7 @@ import { isEmptyObject, LogRecordsType, ObjectRefType } from "../crud";
 
 //types
 export interface AuditLogOptionsType {
-    tableName?: string;
+    tableName: string;
     logRecords?: LogRecordsType;
     newLogRecords?: LogRecordsType;
     recordParams?: LogRecordsType;
