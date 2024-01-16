@@ -1,6 +1,6 @@
-import {assertEquals, mcTest, postTestResult} from "@mconnect/mctest";
-import {newDbPg,} from "../src";
-import {MyDb} from "./config";
+import { assertEquals, mcTest, postTestResult } from "@mconnect/mctest";
+import { newDbPg, } from "../src";
+import { MyDb } from "./config";
 
 // test-data: db-configuration settings
 let myDb = MyDb
@@ -28,42 +28,24 @@ const dbc = newDbPg(myDb, myDb.options);
     });
 
     await mcTest({
-        name    : "should successfully connect to the PostgresDB - Pool-Client",
-        testFunc: async () => {
-            let pResult = false
-            try {
-                console.log("dbc-client-connected: ")
-                const client = await dbc.pgPool().connect()
-                client.release()
-                pResult = true
-            } catch (e) {
-                console.log("dbc-client-connection-error: ", e)
-                pResult = false
-            } finally {
-                await dbc.closePgPool()
-            }
-            assertEquals(pResult, true, `client-result-connected: true`);
-        }
-    });
-
-    await mcTest({
         name    : "should successfully connect to the PostgresDB - Pool",
         testFunc: async () => {
-            let pResult = false
+            let pResult: boolean
             try {
-                await dbc.pgPool().connect()
-                console.log("pool-client--connected: ")
+                const client = await dbc.pgPool().connect()
                 pResult = true
+                client.release()
             } catch (e) {
                 console.log("pool-client-connect-error: ", e)
                 pResult = false
-            } finally {
-                await dbc.closePgPool()
             }
             assertEquals(pResult, true, `pool-result-connected: true`);
         }
     });
 
     await postTestResult();
+    await dbc.closePgPool();
+    await dbc.closePgClient();
+    process.exit(0);
 
 })();

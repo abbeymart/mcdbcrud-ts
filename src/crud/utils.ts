@@ -8,7 +8,7 @@ export function checkTaskType(params: CrudParamsType): string {
     if (params.actionParams && params.actionParams.length > 0) {
         const actParam = params.actionParams[0]
         if (!actParam["id"] || actParam["id"] === "") {
-            if (params.actionParams.length === 1 && (params.recordIds && params.recordIds?.length > 0) || params.queryParams && !isEmptyObject(params.queryParams)) {
+            if (params.actionParams.length === 1 && ((params.recordIds && params.recordIds.length > 0) || params.queryParams && !isEmptyObject(params.queryParams))) {
                 taskType = TaskTypes.UPDATE
             } else {
                 taskType = TaskTypes.CREATE

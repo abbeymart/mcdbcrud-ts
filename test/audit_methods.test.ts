@@ -127,5 +127,6 @@ const mcLog = newAuditLog(dbc.pgPool(), "audits");
     });
 
     await postTestResult();
-    await dbc.closePgPool()
+    await dbc.closePgPool();
+    process.exit(0);
 })();

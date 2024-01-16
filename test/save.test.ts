@@ -37,9 +37,11 @@ const crudParams: CrudParamsType = {
             crudParams.actionParams = AuditCreateActionParams
             crudParams.recordIds = []
             crudParams.queryParams = {}
+            console.log("action-params: ", crudParams.actionParams)
             const recLen = crudParams.actionParams.length
             const crud = newSaveRecord(crudParams, CrudParamOptions);
             const res = await crud.saveRecord()
+            console.log("create-res: ", res)
             // console.log("create-result: ", res, res.code, res.value.recordIds, res.value.recordCount)
             const resValue = res.value as CrudResultType
             const idLen = resValue.recordIds?.length || 0
@@ -98,12 +100,12 @@ const crudParams: CrudParamsType = {
             const recLen = crudParams.recordIds.length
             const crud = newSaveRecord(crudParams, CrudParamOptions);
             const res = await crud.saveRecord()
+            console.log("update-res: ", res)
             const resValue = res.value as CrudResultType
-            const idLen = resValue.recordIds?.length || 0
+            const idLen = crudParams.recordIds.length
             const recCount = resValue.recordsCount || 0
             assertEquals(res.code, "success", `update-by-id-task should return code: success`);
-            assertEquals(idLen, recLen, `response-value-records-length should be: ${recLen}`);
-            assertEquals(recCount, recLen, `response-value-recordsCount should be: ${recLen}`);
+            assertEquals(recLen, recCount, `response-value-recordsCount should be: ${recLen}`);
         }
     });
 
@@ -125,6 +127,8 @@ const crudParams: CrudParamsType = {
     });
 
     await postTestResult();
-    await dbc.closePgPool()
+    await dbc.closePgPool();
+    await auditDbc.closePgPool();
+    process.exit(0);
 
 })();

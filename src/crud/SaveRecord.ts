@@ -11,7 +11,7 @@ import { deleteHashCache, QueryHashCacheParamsType } from "@mconnect/mccache";
 import { Crud } from "./Crud";
 import {
     ActionParamsType,
-    ActionParamTaskType, AuditLogOptionsType,
+    ActionParamTaskType, ActionParamType, AuditLogOptionsType,
     CrudOptionsType,
     CrudParamsType, excludeEmptyIdFields, LogRecordsType,
     ModelOptionsType,
@@ -59,7 +59,6 @@ class SaveRecord extends Crud {
 
         // determine update / create (new) items from actionParams
         const {recordIds} = await this.computeItems();
-
         // validate createItems and updateItems
         if (this.createItems.length > 0 && this.updateItems.length > 0) {
             return getResMessage("paramsError", {
@@ -95,7 +94,6 @@ class SaveRecord extends Crud {
                 // create records
                 return await this.createRecord();
             } catch (e) {
-                // console.error(e);
                 return getResMessage("insertError", {
                     message: "Error-inserting/creating new record.",
                 });
@@ -145,7 +143,6 @@ class SaveRecord extends Crud {
                 // update records
                 return await this.updateRecordById();
             } catch (e) {
-                // console.error(e);
                 return getResMessage("updateError", {
                     message: `Error updating record(s): ${e.message ? e.message : ""}`,
                 });
@@ -172,7 +169,6 @@ class SaveRecord extends Crud {
                 // update records
                 return await this.updateRecordByParams();
             } catch (e) {
-                // console.error(e);
                 return getResMessage("updateError", {
                     message: `Error updating record(s): ${e.message ? e.message : ""}`,
                 });
@@ -209,15 +205,13 @@ class SaveRecord extends Crud {
 
     async computeItems(modelOptions: ModelOptionsType = this.modelOptions): Promise<ActionParamTaskType> {
         let updateItems: ActionParamsType = [],
-            recordIds: Array<string> = [],
-            createItems: ActionParamsType = [];
+            createItems: ActionParamsType = [],
+            recordIds: Array<string> = [];
+
         // cases - actionParams.length === 1 OR > 1
         if (this.actionParams.length === 1) {
             let item = this.actionParams[0]
-            if (!item["id"] || item["id"] === "") {
-                // exclude any traces/presence of id, especially without concrete value ("", null, undefined)
-                const {id, ...saveParams} = item;
-                item = saveParams;
+            if (!item["id"]) {
                 if (this.recordIds.length > 0 || !isEmptyObject(this.queryParams)) {
                     // update existing record(s), by recordIds or queryParams
                     if (modelOptions.actorStamp) {
@@ -227,28 +221,28 @@ class SaveRecord extends Crud {
                         item["updatedAt"] = new Date();
                     }
                     if (modelOptions.activeStamp && item.isActive === undefined) {
-                        item["isActive"] = true;
+                        item["isActive"] = modelOptions.activeStamp;
                     }
-                    updateItems.push(item);
                 } else {
                     // create new record
-                    this.recordIds = [];
-                    this.queryParams = {};
+                    // exclude any traces/presence of id, especially without concrete value ("", null, undefined)
+                    const {id, ...itemRec} = item;
                     if (modelOptions.actorStamp) {
-                        item["createdBy"] = this.userId;
+                        itemRec["createdBy"] = this.userId;
                     }
                     if (modelOptions.timeStamp) {
-                        item["createdAt"] = new Date();
+                        itemRec["createdAt"] = new Date();
                     }
-                    if (modelOptions.activeStamp && item.isActive === undefined) {
-                        item["isActive"] = true;
+                    if (modelOptions.activeStamp && itemRec.isActive === undefined) {
+                        itemRec["isActive"] = modelOptions.activeStamp;
                     }
-                    createItems.push(item);
+                    createItems.push(itemRec);
                 }
             } else {
                 // update existing document/record, by recordId
                 this.recordIds = [];
                 this.queryParams = {};
+                recordIds.push(item["id"] as string)
                 if (modelOptions.actorStamp) {
                     item["updatedBy"] = this.userId;
                 }
@@ -256,19 +250,16 @@ class SaveRecord extends Crud {
                     item["updatedAt"] = new Date();
                 }
                 if (modelOptions.activeStamp && item.isActive === undefined) {
-                    item["isActive"] = true;
+                    item["isActive"] = modelOptions.activeStamp;
                 }
                 updateItems.push(item);
-                recordIds.push(item["id"]);
             }
-            this.createItems = createItems;
-            this.updateItems = updateItems;
         } else if (this.actionParams.length > 1) {
             // multiple/batch creation or update of document/records
             this.recordIds = [];
             this.queryParams = {};
             for (const item of this.actionParams) {
-                if (item["id"] || item["id"] !== "") {
+                if (item["id"]) {
                     // update existing document/record
                     if (modelOptions.actorStamp) {
                         item["updatedBy"] = this.userId;
@@ -277,15 +268,14 @@ class SaveRecord extends Crud {
                         item["updatedAt"] = new Date();
                     }
                     if (modelOptions.activeStamp && item.isActive === undefined) {
-                        item["isActive"] = true;
+                        item["isActive"] = modelOptions.activeStamp;
                     }
+                    recordIds.push(item["id"] as string)
                     updateItems.push(item);
-                    recordIds.push(item["id"]);
                 } else {
                     // create new document/record
                     // exclude any traces/presence of id, especially without concrete value ("", null, undefined)
-                    const {id, ...saveParams} = item;
-                    const itemRec = saveParams;
+                    const {id, ...itemRec} = item;
                     if (modelOptions.actorStamp) {
                         itemRec["createdBy"] = this.userId;
                     }
@@ -293,22 +283,18 @@ class SaveRecord extends Crud {
                         itemRec["createdAt"] = new Date();
                     }
                     if (modelOptions.activeStamp && itemRec.isActive === undefined) {
-                        itemRec["isActive"] = true;
+                        itemRec["isActive"] = modelOptions.activeStamp;
                     }
                     createItems.push(itemRec);
                 }
             }
-            this.createItems = createItems;
-            this.updateItems = updateItems;
-            // update recordIds
-            if (recordIds.length > 0) {
-                this.recordIds = recordIds
-            }
         }
+        this.createItems = createItems;
+        this.updateItems = updateItems;
         return {
             createItems,
             updateItems,
-            recordIds,
+            recordIds: recordIds,
         };
     }
 
@@ -339,7 +325,7 @@ class SaveRecord extends Crud {
             await client.query("BEGIN")
             for await (const values of createQueryObject.fieldValues) {
                 const res = await client.query(createQueryObject.createQuery, values)
-                if (res.rowCount > 0 && res.rows[0].id) {
+                if (res.rowCount && res.rowCount > 0 && res.rows[0].id) {
                     recordIds.push(res.rows[0].id)
                 } else {
                     throw new Error("Unable to create new record(s), database error.")
@@ -347,12 +333,12 @@ class SaveRecord extends Crud {
                 recordsCount += res.rowCount
             }
             // trx ends
-            if (recordsCount > 0 && recordsCount === recordIds.length) {
+            if (recordsCount > 0 && recordsCount === this.createItems.length) {
                 // delete cache
                 const cacheParams: QueryHashCacheParamsType = {
-                    key: this.cacheKey,
+                    key : this.cacheKey,
                     hash: this.table,
-                    by: "hash",
+                    by  : "hash",
                 }
                 deleteHashCache(cacheParams);
                 // check the audit-log settings - to perform audit-log
@@ -415,7 +401,7 @@ class SaveRecord extends Crud {
             await client.query("BEGIN")
             for await (const updateQueryObject of updateQueryObjects) {
                 const res = await client.query(updateQueryObject.updateQuery, updateQueryObject.fieldValues)
-                if (res.rowCount > 0 && res.rows[0].id) {
+                if (res.rowCount && res.rowCount > 0 && res.rows[0].id) {
                     recordIds.push(res.rows[0].id)
                 } else {
                     throw new Error("Unable to create new record(s), database error.")
@@ -425,11 +411,11 @@ class SaveRecord extends Crud {
             if (recordsCount > 0 && recordsCount === recordIds.length) {
                 // delete cache
                 const cacheParams: QueryHashCacheParamsType = {
-                    key: this.cacheKey,
+                    key : this.cacheKey,
                     hash: this.table,
-                    by: "hash",
+                    by  : "hash",
                 }
-                await deleteHashCache(cacheParams);
+                deleteHashCache(cacheParams);
                 // check the audit-log settings - to perform audit-log
                 let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
                 if (this.logUpdate || this.logCrud) {
@@ -481,9 +467,12 @@ class SaveRecord extends Crud {
             // update one record
             if (this.recordIds.length === 1) {
                 // destruct id /other attributes
-                const {id, ...otherParams} = this.actionParams[0];
-
-                const {updateQueryObject, ok, message} = computeUpdateQueryById(this.table, otherParams, id)
+                let recordItem = this.actionParams[0]
+                if (recordItem["id"]) {
+                    const {id, ...oParams} = recordItem;
+                    recordItem = oParams
+                }
+                const {updateQueryObject, ok, message} = computeUpdateQueryById(this.table, recordItem, this.recordIds[0])
                 if (!ok) {
                     return getResMessage("saveError", {
                         message: message,
@@ -496,10 +485,10 @@ class SaveRecord extends Crud {
                 // trx starts | include returning id for each update
                 await client.query('BEGIN')
                 const res = await client.query(updateQueryObject.updateQuery, updateQueryObject.fieldValues)
-                if (res.rowCount > 0 && res.rows[0].id) {
+                if (res.rowCount && res.rowCount > 0 && res.rows[0].id) {
                     recordIds.push(res.rows[0].id)
                 } else {
-                    throw new Error("Unable to create new record(s), database error.")
+                    throw new Error("Unable to update record(s), database error.")
                 }
                 recordsCount += res.rowCount
                 // trx ends
@@ -507,12 +496,16 @@ class SaveRecord extends Crud {
             // update multiple records
             if (this.recordIds.length > 1) {
                 // destruct id /other attributes
-                const {id, ...otherParams} = this.actionParams[0];
+                let recordItem = this.actionParams[0]
+                if (recordItem["id"]) {
+                    const {id, ...oParams} = recordItem;
+                    recordItem = oParams
+                }
                 const {
                     updateQueryObject,
                     ok,
                     message
-                } = computeUpdateQueryByIds(this.table, otherParams, this.recordIds)
+                } = computeUpdateQueryByIds(this.table, recordItem, this.recordIds)
                 if (!ok) {
                     return getResMessage("saveError", {
                         message: message,
@@ -525,35 +518,32 @@ class SaveRecord extends Crud {
                 // trx starts
                 await client.query('BEGIN')
                 const res = await client.query(updateQueryObject.updateQuery, updateQueryObject.fieldValues)
-                if (res.rowCount > 0 && res.rows[0].id) {
-                    // recordIds.push(res.rows[0].id)
-                    recordIds = res.rows.map(row => row.id)
+                // for multiple record updates, rows.length === 0
+                if (res.rowCount && res.rowCount > 0) {
+                    recordsCount = res.rowCount
                 } else {
-                    throw new Error("Unable to create new record(s), database error.")
+                    throw new Error("Unable to update record(s), database error.")
                 }
-                recordsCount += res.rowCount
-                // recordIds = this.recordIds
                 // trx ends
             }
-            if (recordsCount > 0 && recordsCount === this.recordIds.length) {
+            if (recordsCount > 0) {
                 // delete cache
                 const cacheParams: QueryHashCacheParamsType = {
-                    key: this.cacheKey,
+                    key : this.cacheKey,
                     hash: this.table,
-                    by: "hash",
+                    by  : "hash",
                 }
-                await deleteHashCache(cacheParams);
+                deleteHashCache(cacheParams);
                 // check the audit-log settings - to perform audit-log
                 let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
                 if (this.logUpdate || this.logCrud) {
                     // include query-params for audit-log
                     const logRecs: LogRecordsType = {logRecords: this.currentRecs}
-                    const newLogRecs: LogRecordsType = {logRecords: this.updateItems}
-                    const updateParams: LogRecordsType = {...newLogRecs, ...{recordIds: this.recordIds}};
+                    const newLogRecs: LogRecordsType = {logRecords: this.actionParams, recordIds: this.recordIds}
                     const logParams: AuditLogOptionsType = {
                         tableName    : this.table,
                         logRecords   : logRecs,
-                        newLogRecords: updateParams,
+                        newLogRecords: newLogRecs,
                     }
                     logRes = await this.transLog.updateLog(this.userId, logParams);
                 }
@@ -586,7 +576,12 @@ class SaveRecord extends Crud {
         let recordsCount = 0
         try {
             // destruct id /other attributes
-            const {id, ...otherParams} = this.actionParams[0];
+            let otherParams: ActionParamType = {}
+            const recordItem = this.actionParams[0]
+            if (recordItem["id"]) {
+                const {id, ...oParams} = recordItem;
+                otherParams = oParams
+            }
             // include item stamps: userId and date
             if (this.modelOptions.actorStamp) {
                 otherParams.updatedBy = this.userId;
@@ -611,19 +606,20 @@ class SaveRecord extends Crud {
             // trx starts
             await client.query('BEGIN')
             const res = await client.query(updateQueryObject.updateQuery, updateQueryObject.fieldValues)
-            if (res.rowCount < 1) {
+            if (res.rowCount && res.rowCount > 0) {
+                recordsCount = res.rowCount
+            } else {
                 throw new Error("Unable to create new record(s), database error.")
             }
-            recordsCount += res.rowCount
             // trx ends
             if (recordsCount > 0) {
                 // delete cache
                 const cacheParams: QueryHashCacheParamsType = {
-                    key: this.cacheKey,
+                    key : this.cacheKey,
                     hash: this.table,
-                    by: "hash",
+                    by  : "hash",
                 }
-                await deleteHashCache(cacheParams);
+                deleteHashCache(cacheParams);
                 // check the audit-log settings - to perform audit-log
                 let logRes = {code: "noLog", message: "noLog", value: {}} as ResponseMessage;
                 if (this.logUpdate || this.logCrud) {

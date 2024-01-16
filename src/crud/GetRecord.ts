@@ -75,9 +75,10 @@ class GetRecord extends Crud {
                     key : this.cacheKey,
                     hash: this.table,
                 }
-                const cacheRes = await getHashCache(cacheParams);
+                const cacheRes = getHashCache(cacheParams);
                 if (cacheRes && cacheRes.value) {
-                    console.log("cache-items-before-query: ", cacheRes.value.records[0]);
+                    const cacheValue = cacheRes.value as GetResultType
+                    console.log("cache-items-before-query: ", cacheValue.records[0]);
                     return getResMessage("success", {
                         value  : cacheRes.value,
                         message: "from cache",
@@ -106,7 +107,7 @@ class GetRecord extends Crud {
                         logRes,
                     }
                     if (this.cacheGetResult) {
-                        const cacheParams: HashCacheParamsType = {
+                        const cacheParams: HashCacheParamsType<any> = {
                             key   : this.cacheKey,
                             hash  : this.table,
                             value : resultValue,
@@ -147,7 +148,7 @@ class GetRecord extends Crud {
                         logRes,
                     }
                     if (this.cacheGetResult) {
-                        const cacheParams: HashCacheParamsType = {
+                        const cacheParams: HashCacheParamsType<any> = {
                             key   : this.cacheKey,
                             hash  : this.table,
                             value : resultValue,

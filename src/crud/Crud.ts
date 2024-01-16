@@ -34,6 +34,7 @@ import {
     computeSelectQueryByParams
 } from "./helpers";
 import { toCamelCase } from "./utils";
+import { isEmptyObject } from "./validate";
 
 export class Crud {
     protected params: CrudParamsType;
@@ -299,6 +300,11 @@ export class Crud {
 
             switch (by.toLowerCase()) {
                 case "id":
+                    if(this.recordIds.length < 1) {
+                        return getResMessage("paramsError", {
+                            message: "recordIds parameter is required to fetch current-records",
+                        })
+                    }
                     // select by id
                     if (this.recordIds.length === 1) {
                         selectQueryResult = computeSelectQueryById(this.modelRef, this.table, this.recordIds[0], {
@@ -325,6 +331,11 @@ export class Crud {
                     recRes = await this.appDb.query(selectQueryResult.selectQueryObject.selectQuery, selectQueryResult.selectQueryObject.fieldValues)
                     break;
                 case "queryparams":
+                    if(isEmptyObject(this.queryParams)) {
+                        return getResMessage("paramsError", {
+                            message: "queryParams parameter is required to fetch current-records",
+                        })
+                    }
                     // get records by query-params
                     selectQueryResult = computeSelectQueryByParams(this.modelRef, this.table, this.queryParams, {
                         skip : this.skip,
@@ -390,7 +401,6 @@ export class Crud {
                 });
             }
         } catch (e) {
-            console.error(e);
             return getResMessage("notFound", {
                 message: `Error retrieving current document/record(s): ${e.message}`,
                 value  : {},
@@ -556,7 +566,6 @@ export class Crud {
                 }
             );
         } catch (e) {
-            console.error("check-access-error: ", e);
             return getResMessage("unAuthorized", {message: e.message});
         }
     }
@@ -750,7 +759,6 @@ export class Crud {
             this.recordIds = recordIds;
             return await this.taskPermissionById(taskType);
         } catch (e) {
-            // console.error("task-permission-error: ", e);
             return getResMessage("unAuthorized", {message: e.message});
         }
     }
@@ -812,7 +820,6 @@ export class Crud {
                 value  : checkAccessValue,
             });
         } catch (e) {
-            console.error("check-login-status-error:", e);
             return getResMessage("unAuthorized", {
                 message: "Unable to verify access information: " + e.message,
             });

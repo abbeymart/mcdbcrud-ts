@@ -2,8 +2,8 @@
 
 ## Version 0.5.0
 
-- Release date: Nov 18, 2022
-- Refactored audit-log-crud-record-types-v0.5.0
+- Release date: TBD
+- Updated-packages-refactored-audit-crud-funcs-types-v0.5.0
 
 ## Version 0.4.0
 

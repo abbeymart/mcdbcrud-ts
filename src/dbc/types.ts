@@ -15,13 +15,16 @@ export interface DbConnectionOptionsType {
     useNewUrlParser?: boolean;
     useUnifiedTopology?: boolean;
     max?: number;
+    ssl?: any;
     idleTimeoutMillis?: number;
     connectionTimeoutMillis?: number;
+    allowExitOnIdle?: boolean
 }
 
 export interface DbConfigType {
     dbType?: string;
     host?: string;
+    isDev?: boolean;
     username?: string;
     password?: string;
     database?: string;

@@ -28,8 +28,8 @@ export interface GetRecordStats {
 export type GetRecords = Array<ObjectType>;
 
 export interface GetResultType {
-    records: GetRecords,
-    stats: GetRecordStats,
+    records: GetRecords;
+    stats: GetRecordStats;
     logRes?: ResponseMessage;
     taskType?: string;
 }
@@ -90,9 +90,9 @@ export interface UserInfoType {
 }
 
 export interface BaseModelType {
-    _id?: string;
+    id?: string;
     language?: string;
-    desc?: string;
+    description?: string;
     isActive?: boolean;
     createdBy?: string | null;
     updatedBy?: string | null;
@@ -401,7 +401,7 @@ export interface CreateQueryObject {
 }
 
 export interface CreateQueryResult {
-    createQueryObject: CreateQueryObject,
+    createQueryObject: CreateQueryObject;
     ok: boolean;
     message: string;
 }

@@ -118,6 +118,8 @@ const crudParams: CrudParamsType = {
     });
 
     await postTestResult();
-    await dbc.closePgPool()
+    await dbc.closePgPool();
+    await auditDbc.closePgPool();
+    process.exit(0);
 
 })();

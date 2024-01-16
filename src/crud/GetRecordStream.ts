@@ -1,5 +1,5 @@
 /**
- * @Author: abbeymart | Abi Akindele | @Created: 2020-04-05 | @Updated: 2020-05-16
+ * @Author: abbeymart | Abi Akindele | @Created: 2020-04-05 | @Updated: 2020-05-16, 2024-01-15
  * @Company: mConnect.biz | @License: MIT
  * @Description: get stream of records, by recordIds, queryParams, all | cache-in-memory
  */
@@ -12,13 +12,11 @@ import {
     computeSelectQueryByIds,
     computeSelectQueryByParams
 } from "./helpers";
-import { PoolClient } from "pg";
 
-const Cursor = require("pg-cursor")
+import Cursor from "pg-cursor";
 
 export interface CursorResultType {
-    cursor?: typeof Cursor;
-    client?: PoolClient;
+    cursor?: Cursor;
     ok: boolean;
     message: string;
     value?: any;
@@ -65,6 +63,7 @@ class GetRecordStream extends Crud {
 
         // Get the item(s) by docId(s), queryParams or all items
         if (this.recordIds && this.recordIds.length > 0) {
+            const client = await this.appDb.connect()
             try {
 
                 // process cursor-query by recordIds
@@ -86,10 +85,8 @@ class GetRecordStream extends Crud {
                         }
                     }
                 }
-                const client = await this.appDb.connect()
                 return {
                     cursor : client.query(new Cursor(selectQueryObject.selectQuery, selectQueryObject.fieldValues)),
-                    client : client,
                     ok     : true,
                     message: "success",
                 }
@@ -99,9 +96,12 @@ class GetRecordStream extends Crud {
                     message: error.message,
                     value  : error,
                 }
+            } finally {
+                client.release()
             }
         }
         if (this.queryParams && Object.keys(this.queryParams).length > 0) {
+            const client = await this.appDb.connect()
             try {
                 // process cursor-query by queryParams
                 const {
@@ -122,10 +122,8 @@ class GetRecordStream extends Crud {
                         }
                     }
                 }
-                const client = await this.appDb.connect()
                 return {
                     cursor : client.query(new Cursor(selectQueryObject.selectQuery, selectQueryObject.fieldValues)),
-                    client : client,
                     ok     : true,
                     message: "success",
                 }
@@ -134,8 +132,11 @@ class GetRecordStream extends Crud {
                     ok     : false,
                     message: error.message,
                 };
+            } finally {
+                client.release()
             }
         }
+        const client = await this.appDb.connect()
         // get all records, up to the permissible limit
         try {
             // process cursor-query, constrain by skip/limit
@@ -153,10 +154,9 @@ class GetRecordStream extends Crud {
                     }
                 }
             }
-            const client = await this.appDb.connect()
+
             return {
                 cursor : client.query(new Cursor(selectQueryObject.selectQuery, selectQueryObject.fieldValues)),
-                client : client,
                 ok     : true,
                 message: "success",
             }
@@ -166,6 +166,8 @@ class GetRecordStream extends Crud {
                 ok     : false,
                 message: error.message,
             }
+        } finally {
+            client.release()
         }
     }
 }

@@ -73,7 +73,7 @@ class DeleteRecord extends Crud {
             }
         }
 
-        // delete / remove item(s) by queryParams
+            // delete / remove item(s) by queryParams
         if (this.queryParams && !isEmptyObject(this.queryParams)) {
             try {
                 // check task-permission

@@ -5,7 +5,7 @@
  */
 
 // Import required module/function(s)
-import { getResMessage, getParamsMessage, ResponseMessage } from "@mconnect/mcresponse";
+import { getParamsMessage, getResMessage, ResponseMessage } from "@mconnect/mcresponse";
 import { validateLoadParams } from "./ValidateCrudParam";
 import { checkDb } from "../dbc";
 import { ActionParamsType, CrudOptionsType, CrudParamsType, UserInfoType } from "./types";
@@ -61,7 +61,7 @@ class LoadRecord {
         Please do not send more than ${this.maxQueryLimit} records to load at a time`;
         }
         if (!isEmptyObject(errors)) {
-            return getParamsMessage(errors, "paramsError");
+            return getParamsMessage(errors);
         }
 
         // create/load multiple records

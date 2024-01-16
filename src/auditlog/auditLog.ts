@@ -65,7 +65,6 @@ class AuditLog {
                 "Created record(s) information is required.";
         }
         if (errorMessage || errorMessage !== "") {
-            console.log("error-message: ", errorMessage);
             return getResMessage("paramsError", {
                 message: errorMessage,
             });
@@ -80,7 +79,7 @@ class AuditLog {
                 values: values,
             }
             const res = await this.dbHandle.query(query)
-            if (res.rowCount > 0) {
+            if (res.rowCount && res.rowCount > 0) {
                 return getResMessage("success", {
                     value: res,
                 });
@@ -91,7 +90,6 @@ class AuditLog {
                 });
             }
         } catch (error) {
-            console.error("Error saving create-audit record(s): ", error);
             return getResMessage("logError", {
                 value  : error,
                 message: "Error saving create-audit record(s): " + error.message,
@@ -138,7 +136,7 @@ class AuditLog {
                 values: values,
             }
             const res = await this.dbHandle.query(query)
-            if (res.rowCount > 0) {
+            if (res.rowCount && res.rowCount > 0) {
                 return getResMessage("success", {
                     value: res,
                 });
@@ -195,7 +193,7 @@ class AuditLog {
                 values: values,
             }
             const res = await this.dbHandle.query(query)
-            if (res.rowCount > 0) {
+            if (res.rowCount && res.rowCount > 0) {
                 return getResMessage("success", {
                     value: res,
                 });
@@ -248,7 +246,7 @@ class AuditLog {
                 values: values,
             }
             const res = await this.dbHandle.query(query)
-            if (res.rowCount > 0) {
+            if (res.rowCount && res.rowCount > 0) {
                 return getResMessage("success", {
                     value: res,
                 });
@@ -259,7 +257,6 @@ class AuditLog {
                 });
             }
         } catch (error) {
-            console.log("Error saving delete-audit record(s): ", error);
             return getResMessage("insertError", {
                 value  : error,
                 message: "Error inserting delete-audit record(s):" + error.message,
@@ -300,7 +297,7 @@ class AuditLog {
                 values: values,
             }
             const res = await this.dbHandle.query(query)
-            if (res.rowCount > 0) {
+            if (res.rowCount && res.rowCount > 0) {
                 return getResMessage("success", {
                     value: res,
                 });
@@ -311,7 +308,6 @@ class AuditLog {
                 });
             }
         } catch (error) {
-            console.log("Error inserting login-audit record(s): ", error);
             return getResMessage("insertError", {
                 value  : error,
                 message: "Error inserting login-audit record(s):" + error.message,
@@ -348,7 +344,7 @@ class AuditLog {
                 values: values,
             }
             const res = await this.dbHandle.query(query)
-            if (res.rowCount > 0) {
+            if (res.rowCount && res.rowCount > 0) {
                 return getResMessage("success", {
                     value: res,
                 });
@@ -359,7 +355,6 @@ class AuditLog {
                 });
             }
         } catch (error) {
-            console.log("Error inserting logout-audit record(s): ", error);
             return getResMessage("insertError", {
                 value  : error,
                 message: "Error inserting login-audit record(s):" + error.message,
@@ -554,7 +549,7 @@ class AuditLog {
         // perform insert task - insert audit record
         try {
             const res = await this.dbHandle.query(query)
-            if (res.rowCount > 0) {
+            if (res.rowCount && res.rowCount > 0) {
                 return getResMessage("success", {
                     value: res,
                 });
@@ -565,7 +560,6 @@ class AuditLog {
                 });
             }
         } catch (error) {
-            console.log("Error saving audit-log record(s): ", error);
             return getResMessage("insertError", {
                 value  : error,
                 message: "Error inserting audit-log record(s):" + error.message,
