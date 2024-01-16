@@ -2,7 +2,7 @@
 
 ## Version 0.5.0
 
-- Release date: TBD
+- Release date: Jan 15, 2024
 - Updated-packages-refactored-audit-crud-funcs-types-v0.5.0
 
 ## Version 0.4.0
