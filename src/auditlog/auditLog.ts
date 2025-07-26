@@ -487,7 +487,7 @@ class AuditLog {
                     queryTextRead = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`
                     valuesRead = [tableName, logRecords, AuditLogTypes.READ, userId, new Date()]
                 } else {
-                    queryTextRead = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_at ) VALUES($1, $2, $3, $4);"
+                    queryTextRead = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_at ) VALUES($1, $2, $3, $4);`
                     valuesRead = [tableName, logRecords, AuditLogTypes.READ, new Date()]
                 }
                 query = {
@@ -513,7 +513,7 @@ class AuditLog {
                     queryTextLogin = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_by, log_at ) VALUES($1, $2, $3, $4, $5);`
                     valuesLogin = [tableName, logRecords, AuditLogTypes.LOGIN, userId, new Date()]
                 } else {
-                    queryTextLogin = "INSERT INTO " + this.auditTable + " (table_name, log_records, log_type, log_at ) VALUES($1, $2, $3, $4);"
+                    queryTextLogin = `INSERT INTO ${this.auditTable}(table_name, log_records, log_type, log_at ) VALUES($1, $2, $3, $4);`
                     valuesLogin = [tableName, logRecords, AuditLogTypes.LOGIN, new Date()]
                 }
                 query = {
