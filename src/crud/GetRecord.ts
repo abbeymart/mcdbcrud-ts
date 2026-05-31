@@ -43,7 +43,7 @@ class GetRecord extends Crud {
             this.skip = 0;
         }
 
-        // check the audit-log settings - to perform audit-log (read/search info - params, keywords etc.)
+        // check the audit-log settings - to perform audit-log (read/search info - params, keywords, etc.)
         let logRes: ResponseMessage;
         if ((this.logRead || this.logCrud) && this.queryParams && !isEmptyObject(this.queryParams)) {
             const logRecs: LogRecordsType = {logRecords: this.queryParams}
@@ -186,7 +186,7 @@ class GetRecord extends Crud {
                                 stats  : res.value.stats,
                                 logRes,
                             }
-                            // cache records not implemented, for consistency & performance reasons
+                            // cache records not implemented: for consistency & performance reasons
                             // if (this.cacheGetResult) {
                             // setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
                             // }
@@ -218,7 +218,7 @@ class GetRecord extends Crud {
                                 stats  : res.value.stats,
                                 logRes,
                             }
-                            // cache records not implemented, for consistency & performance reasons
+                            // cache records not implemented: for consistency & performance reasons
                             // if (this.cacheGetResult) {
                             // setHashCache(this.cacheKey, this.table, resultValue, this.cacheExpire);
                             // }

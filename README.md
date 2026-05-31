@@ -5,8 +5,7 @@
 - See the test folder for different test cases / scenarios and usage
 
 ## Installation
-```js
-
+```shell
 npm i @mconnect/mcdbcrud
 
 ```

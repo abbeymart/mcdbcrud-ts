@@ -197,7 +197,7 @@ export class Crud {
     // implement toString method
     protected toString = (): string => `CRUD Instance Information: ${this}`
 
-    // ownerRecordsCount method query the current/instance DB-table and returns totalRecords for the current user
+    // ownerRecordsCount method queries the current/instance DB-table and returns totalRecords for the current user
     async ownerRecordsCount(): Promise<OwnerRecordCountResultType> {
         try {
             // validate userId
@@ -229,7 +229,7 @@ export class Crud {
         }
     }
 
-    // recordsCount method query the current/instance DB-table and returns totalRecords
+    // recordsCount method queries the current/instance DB-table and returns totalRecords
     async recordsCount(): Promise<RecordCountResultType> {
         try {
             // totalRecordsCount from the table
@@ -414,7 +414,7 @@ export class Crud {
         let roleServices: Array<RoleServiceResponseType> = [];
         try {
             // validate databases
-            const validRoleServiceDb = await this.checkDb(this.accessDb);
+            const validRoleServiceDb = this.checkDb(this.accessDb);
             if (validRoleServiceDb.code !== "success") {
                 return [];
             }
@@ -469,11 +469,11 @@ export class Crud {
     async checkTaskAccess(userInfo: UserInfoType, recordIds: Array<string> = []): Promise<ResponseMessage> {
         try {
             // validate databases
-            const validAccessDb = await this.checkDb(this.accessDb);
+            const validAccessDb = this.checkDb(this.accessDb);
             if (validAccessDb.code !== "success") {
                 return validAccessDb;
             }
-            const validServiceDb = await this.checkDb(this.appDb);
+            const validServiceDb = this.checkDb(this.appDb);
             if (validServiceDb.code !== "success") {
                 return validServiceDb;
             }
@@ -522,8 +522,8 @@ export class Crud {
                 ownerPermitted = true
             }
             // if all the above checks passed, check for role-services access by taskType
-            // obtain crudTable/tableId (id) from serviceTable (repo for all resources)
-            // const serviceCats = ["table", "Table", "collection", "Collection",]
+            // get crudTable/tableId (id) from serviceTable (repo for all resources)
+            // const serviceCats = ["table", "Table", "collection", "Collection"]
             const queryText = `SELECT id, category FROM ${this.serviceTable}`
             const whereQuery = ` WHERE category IN ('table', 'Table', 'collection', 'Collection') AND name = $1`
             const values = [this.table]
@@ -767,15 +767,15 @@ export class Crud {
     async checkLoginStatus(): Promise<ResponseMessage> {
         try {
             // validate databases
-            const validDb = await this.checkDb(this.appDb)
+            const validDb = this.checkDb(this.appDb)
             if (validDb.code !== "success") {
                 return validDb;
             }
-            const validAccessDb = await this.checkDb(this.accessDb)
+            const validAccessDb = this.checkDb(this.accessDb)
             if (validAccessDb.code !== "success") {
                 return validAccessDb;
             }
-            // check loginName, userId and token validity... from access table
+            // check loginName, userId and token validity... from the access table
             const queryText = `SELECT expire FROM ${this.accessTable}`
             const whereQuery = ` WHERE user_id=$1 AND login_name=$2 AND token=$3`
             const values = [this.userInfo.userId, this.userInfo.loginName, this.userInfo.token]
