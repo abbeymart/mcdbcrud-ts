@@ -1,5 +1,10 @@
 # Historical logs
 
+## Version 0.6.0
+
+- Release date: TBD
+- Updated-packages-....-v0.6.0 (May-31-2026)
+
 ## Version 0.5.0
 
 - Release date: Jan 15, 2024
