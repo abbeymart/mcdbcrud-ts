@@ -332,7 +332,6 @@ class SaveRecord extends Crud {
                 }
                 recordsCount += res.rowCount
             }
-            // trx ends
             if (recordsCount > 0 && recordsCount === this.createItems.length) {
                 // delete cache
                 const cacheParams: QueryHashCacheParamsType = {
@@ -351,6 +350,7 @@ class SaveRecord extends Crud {
                     }
                     logRes = await this.transLog.createLog(this.userId, logParams);
                 }
+                // trx ends
                 await client.query("COMMIT")
                 return getResMessage("success", {
                     message: "Record(s) created successfully.",
